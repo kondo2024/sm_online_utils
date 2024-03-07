@@ -1,0 +1,150 @@
+#ifndef __MONITORONLINE__
+#define __MONITORONLINE__
+
+#include "TFile.h"
+#include "TH1.h"
+#include "TH2.h"
+
+#include "TArtEventStore.hh"
+
+#include "TArtBigRIPSParameters.hh"
+#include "TArtCATANAParameters.hh"
+#include "TArtSAMURAIParameters.hh"
+#include "TArtDALIParameters.hh"
+//#include "TArtMINOSParameters.hh"
+#include "TArtSILICONSParameters.hh"
+
+#include "TArtCalibCoin.hh"
+#include "TArtCalibPlastic.hh"
+#include "TArtCalibPPAC.hh"
+#include "TArtCalibIC.hh"
+#include "TArtCalibCATANA.hh"
+//#include "TArtCalibHECTOR.hh"
+#include "TArtCalibDALI.hh"
+#include "TArtCalibBDC1Hit.hh"
+#include "TArtCalibBDC2Hit.hh"
+#include "TArtCalibFDC1Hit.hh"
+#include "TArtCalibFDC2Hit.hh"
+#include "TArtCalibHODPla.hh"
+#include "TArtCalibNEBULA.hh"
+#include "TArtCalibNeuLAND.hh"
+#include "TArtCalibNeuLANDVETO.hh"
+#include "TArtCalibNINJA.hh"
+//#include "TArtCalibMINOS.hh"
+//#include "TArtAnalyzedMINOS.hh"
+//#include "TArtTrackMINOS.hh"
+//#include "TArtVertexMINOS.hh"
+
+#include "TArtCalibPDCHit.hh"
+#include "TArtCalibFDC0Hit.hh"
+#include "TArtCalibFDC3KHit.hh"
+#include "TArtCalibSILICONS.hh"
+
+#include <vector>
+
+class OnlineMonitor : public TObject {
+public:
+  OnlineMonitor(TString RidfFile="online");
+  ~OnlineMonitor();
+
+  void Init();
+  void Run();
+
+  void InitAnalysis();
+  void Delete();
+  void BookHist();
+  void AnalyzeOneEvent();
+
+  void EventLoop();
+  void Draw();
+  void ClearHist();
+
+private:
+  TFile *fRootFile;
+  TArtEventStore* festore;
+
+  Bool_t fUsePPAC;
+  Bool_t fUseIC;
+  Bool_t fUseFDC2;
+  Bool_t fUseCATANA;
+  Bool_t fUseDALI;
+  Bool_t fUseNEBULA;
+  Bool_t fUseNeuLAND;
+  Bool_t fUseNINJA;
+  //Bool_t fUseMINOS;
+  Bool_t fUseFDC0;
+  Bool_t fUseFDC3k;
+  Bool_t fUsePDC;
+  Bool_t fUseSi;
+  TString fICBName;
+
+  TArtBigRIPSParameters* fbripsprm;
+  TArtCATANAParameters* fcatanaprm;
+  TArtSAMURAIParameters* fsmprm;
+  TArtDALIParameters* fdaliprm;
+  //TArtMINOSParameters* fminosprm;
+  TArtSILICONSParameters* fsiprm;
+
+  TArtCalibCoin *fCalibCoin;
+  TArtCalibPlastic *fCalibPla;
+  TArtCalibPPAC *fCalibPPAC;
+  TArtCalibIC *fCalibIC;
+  TArtCalibCATANA *fCalibCATANA;
+//  TArtCalibHECTOR *fCalibHECTOR;
+  TArtCalibDALI *fCalibDALI;
+  Bool_t fInitAnalysis;
+  Bool_t fIsHistBooked;
+  std::vector<TH1*> fhist_array;
+  TString fRunName;
+
+  Int_t fnx;
+  Int_t fny;
+  Int_t fResetCount;
+  Int_t fDrawTimeInterval;
+
+  TH1* fhcoin;
+
+  TH1* fhpla_idtl;
+  TH1* fhpla_idtr;
+  TH1* fhpla_idql;
+  TH1* fhpla_idqr;
+
+  TH1* fhpla_tof37ica;
+
+  TH1* fhppac_idtx1;
+  TH1* fhppac_idtx2;
+  TH1* fhppac_idty1;
+  TH1* fhppac_idty2;
+  TH1* fhppac_idta;
+  TH1* fhppac_idqx1;
+  TH1* fhppac_idqx2;
+  TH1* fhppac_idqy1;
+  TH1* fhppac_idqy2;
+  TH1* fhppac_idqa;
+  TH1* fhppac_idx;
+  TH1* fhppac_idy;
+
+  TH1* fhic_cha;
+
+  TH1* fhcatana_ida;
+  TH1* fhcatana_idt;
+  TH1* fhcatana_multi;
+
+  TH1* fhdali_ida;
+  TH1* fhdali_idt;
+  TH1* fhdali_multi;
+
+  TH1* fhlabr_idtl;
+  TH1* fhlabr_idtt;
+  TH1* fhlabr_multi;
+
+  TH1* fhbdc1idtdc;
+  TH1* fhbdc2idtdc;
+  TH1* fhfdc1idtdc;
+  TH1* fhfdc2idtdc;
+  Int_t f_iplot;
+
+  ClassDef(OnlineMonitor,1);
+};
+
+#endif
