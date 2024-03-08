@@ -4,12 +4,17 @@ as online monitor. They uses converterlib and filterlib. Directory is
 like this. 
 
 smutils
- |- converterlib
- |- filterlib
- |- sXXX    // for a specific experiment
-     |- converters
-     |- filters
-     |- onlinemonitor
+  |
+  |- lib
+  |   |- smconverter
+  |   |- smfilter
+  |
+  |- sXXX    // for a specific experiment
+      |- bin
+      |- converters
+      |- filters
+      |- macros
+      |- onlinemonitor
 
 ## Converter
 This converts the RIDF data to root tree.
@@ -49,3 +54,32 @@ Online data monitor for checking rawdata during beam time.
 
 click the canvas and press any key, then analysis is paused and
 several commands will be available.
+
+- - -
+
+### Notes for developers
+
+#### converter
+
+##### XXXXDataProcessor
+call TArtCalibXXXX, prepare tree, histograms. All the processors have
+to inherit SAMURAIDataProcessor.
+
+#### SAMURAIDataConveter
+main class of the converter. After registration of the data
+processors, Run should be called. Then, preparation of tree/histograms
+and eventloop will happens.
+
+
+#### filter
+
+##### DataMergeFilter
+Base class for filter. This class has several useful methods to
+automatically search time stamp offset, correction factor of the time
+stamp period, etc. 
+
+##### DataMergeFilter_XXXX
+This class inherits the base class (DataMergeFilter) for a specifit
+detector system. Filter() have to be implemented for the definition of
+the tree branch and initialization. It is recommended to implement
+Run() for easy use.
