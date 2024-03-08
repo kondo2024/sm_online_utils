@@ -57,28 +57,28 @@ several commands will be available.
 
 - - -
 
-### Notes for developers
+## Notes for developers
 
-#### converter
+### converter
 
-##### XXXXDataProcessor
+#### XXXXDataProcessor
 call TArtCalibXXXX, prepare tree, histograms. All the processors have
 to inherit SAMURAIDataProcessor.
 
-#### SAMURAIDataConveter
+### SAMURAIDataConveter
 main class of the converter. After registration of the data
 processors, Run should be called. Then, preparation of tree/histograms
 and eventloop will happens.
 
 
-#### filter
+### filter
 
-##### DataMergeFilter
+#### DataMergeFilter
 Base class for filter. This class has several useful methods to
 automatically search time stamp offset, correction factor of the time
 stamp period, etc. 
 
-##### DataMergeFilter_XXXX
+#### DataMergeFilter_XXXX
 This class inherits the base class (DataMergeFilter) for a specifit
 detector system. Filter() have to be implemented for the definition of
 the tree branch and initialization. It is recommended to implement
