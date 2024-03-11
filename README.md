@@ -8,7 +8,7 @@ sm_online_utils
 ├── lib
 │   ├── smconverter
 │   └── smfilter
-└── s053
+└─sXXX          (for specifit experiment)
     ├── bin
     ├── converters
     │   ├── Makefile
