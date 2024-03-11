@@ -1,27 +1,27 @@
 # utility package for SAMURAI online analysis
 This package contains Converters and Filters for the data merge as
 well as online monitor. Directory structure is like this. 
+
 ```
 sm_online_utils
 ├── README.md
 ├── lib
-│   ├── smconverter
-│   └── smfilter
-└─sXXX (for specific experiment)
+│   ├── smconverter
+│   └── smfilter
+└── s053
     ├── bin
     ├── converters
-    │   ├── Makefile
-    │   └── smts_converter.cc
+    │   ├── Makefile
+    │   └── smts_converter.cc
     ├── filters
-    │   ├── Makefile
-    │   └── pfad_data_filter.cc
+    │   ├── Makefile
+    │   └── pfad_data_filter.cc
     ├── macros
-    │   ├── chkmerge.cc
-    │   └── pfad_filter_run.cc
+    │   ├── chkmerge.cc
+    │   └── pfad_filter_run.cc
     └── onlinemonitor
         ├── OnlineMonitor.cc
         └── OnlineMonitor.hh
-
 ```
 
 ## Converter
