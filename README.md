@@ -6,36 +6,16 @@ sm_online_utils
 ├── README.md
 ├── lib
 │   ├── smconverter
-│   │   ├── CoinDataProcessor.cc
-│   │   ├── CoinDataProcessor.hh
-│   │   ├── Makefile
-│   │   ├── NEBULADataProcessor.cc
-│   │   ├── NEBULADataProcessor.hh
-│   │   ├── SAMURAIDataConverter.cc
-│   │   ├── SAMURAIDataConverter.hh
-│   │   ├── SAMURAIDataProcessor.hh
-│   │   ├── SAMURAITSDataProcessor.cc
-│   │   └── SAMURAITSDataProcessor.hh
 │   └── smfilter
-│       ├── DataMergeFilter.cc
-│       ├── DataMergeFilter.hh
-│       ├── DataMergeFilter_CATANA.cc
-│       ├── DataMergeFilter_CATANA.hh
-│       ├── DataMergeFilter_PFAD.cc
-│       ├── DataMergeFilter_PFAD.hh
-│       └── Makefile
-└── s053
+└─sXXX (for specific experiment)
     ├── bin
     ├── converters
     │   ├── Makefile
-    │   ├── nebula_converter.cc
     │   └── smts_converter.cc
     ├── filters
     │   ├── Makefile
-    │   ├── catana_data_filter.cc
     │   └── pfad_data_filter.cc
     ├── macros
-    │   ├── catana_filter_run.cc
     │   ├── chkmerge.cc
     │   └── pfad_filter_run.cc
     └── onlinemonitor
