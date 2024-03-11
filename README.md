@@ -8,7 +8,7 @@ sm_online_utils
 ├── lib
 │   ├── smconverter
 │   └── smfilter
-└─sXXX          (for specifit experiment)
+└─sXXX          (for a specific experiment)
     ├── bin
     ├── converters
     │   ├── Makefile
@@ -54,7 +54,7 @@ sample root macro to make plots from merged tree data.
 Online data monitor for checking rawdata during beam time.
 
 ### usage
-1. Add includ path of smconverterlib and load libsmconverter.so in root.
+1. Add include path of smconverterlib and load libsmconverter.so in root.
 2. ROOT[0] .L OnlineMonitor.cc+g
 3. ROOT[1] OnlineMonitor *mon = new OnlineMonitor() 
    // for online data, input ridf file name for offline analysis 
@@ -73,7 +73,7 @@ several commands will be available.
 Load parameter file XXXX.xml,call TArtCalibXXXX,prepare tree,
 histograms. All the processors have to inherit
 SAMURAIDataProcessor. In case of drift chambers TDC distributions are
-also loaded for drft time -> drift length calibration.
+also loaded for drift time -> drift length calibration.
 
 ##### SAMURAIDataConveter
 main class of the converter. After registration of the data
@@ -89,7 +89,7 @@ automatically search time stamp offset, correction factor of the time
 stamp period, etc. 
 
 ##### DataMergeFilter_XXXX
-This class inherits the base class (DataMergeFilter) for a specifit
+This class inherits the base class (DataMergeFilter) for a specific
 detector system. Filter() have to be implemented for the definition of
 the tree branch and initialization. It is recommended to implement
 Run() for easy use. The class is called in sXXX/filters/XXXX_filter.cc 
