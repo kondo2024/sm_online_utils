@@ -1,7 +1,7 @@
 # utility package for SAMURAI online analysis
 This package contains Converters and Filters for the data merge as
 well as online monitor. Directory structure is like this. 
-'''
+```
 sm_online_utils
  README.md
  lib
@@ -42,7 +42,7 @@ sm_online_utils
          OnlineMonitor.cc
          OnlineMonitor.hh
 
-'''
+```
 
 ## Converter
 This converts the RIDF data to root tree.
