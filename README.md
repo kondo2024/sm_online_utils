@@ -1,20 +1,48 @@
 # utility package for SAMURAI online analysis
-This package contains Converters, Filters for the data merge as well
-as online monitor. They uses converterlib and filterlib. Directory is
-like this. 
+This package contains Converters and Filters for the data merge as
+well as online monitor. Directory structure is like this. 
+'''
+sm_online_utils
+ README.md
+ lib
+  smconverter
+   CoinDataProcessor.cc
+   CoinDataProcessor.hh
+   Makefile
+   NEBULADataProcessor.cc
+   NEBULADataProcessor.hh
+   SAMURAIDataConverter.cc
+   SAMURAIDataConverter.hh
+   SAMURAIDataProcessor.hh
+   SAMURAITSDataProcessor.cc
+   SAMURAITSDataProcessor.hh
+  smfilter
+      DataMergeFilter.cc
+      DataMergeFilter.hh
+      DataMergeFilter_CATANA.cc
+      DataMergeFilter_CATANA.hh
+      DataMergeFilter_PFAD.cc
+      DataMergeFilter_PFAD.hh
+      Makefile
+ s053
+     bin
+     converters
+      Makefile
+      nebula_converter.cc
+      smts_converter.cc
+     filters
+      Makefile
+      catana_data_filter.cc
+      pfad_data_filter.cc
+     macros
+      catana_filter_run.cc
+      chkmerge.cc
+      pfad_filter_run.cc
+     onlinemonitor
+         OnlineMonitor.cc
+         OnlineMonitor.hh
 
-smutils
-  |
-  |- lib
-  |   |- smconverter
-  |   |- smfilter
-  |
-  |- sXXX    // for a specific experiment
-      |- bin
-      |- converters
-      |- filters
-      |- macros
-      |- onlinemonitor
+'''
 
 ## Converter
 This converts the RIDF data to root tree.
@@ -62,14 +90,16 @@ several commands will be available.
 ### converter
 
 ##### XXXXDataProcessor
-call TArtCalibXXXX, prepare tree, histograms. All the processors have
-to inherit SAMURAIDataProcessor.
+Load parameter file XXXX.xml,call TArtCalibXXXX,prepare tree,
+histograms. All the processors have to inherit
+SAMURAIDataProcessor. In case of drift chambers TDC distributions are
+also loaded for drft time -> drift length calibration.
 
 ##### SAMURAIDataConveter
 main class of the converter. After registration of the data
 processors, Run should be called. Then, preparation of tree/histograms
-and eventloop will happens.
-
+and eventloop will happens. The class is called in
+sXXX/converters/smts_converter.cc, etc.
 
 ### filter
 
@@ -82,4 +112,4 @@ stamp period, etc.
 This class inherits the base class (DataMergeFilter) for a specifit
 detector system. Filter() have to be implemented for the definition of
 the tree branch and initialization. It is recommended to implement
-Run() for easy use.
+Run() for easy use. The class is called in sXXX/filters/XXXX_filter.cc 
