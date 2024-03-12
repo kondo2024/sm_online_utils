@@ -27,7 +27,7 @@ sm_online_utils
 Required
 
 - ANAROOT
-- NPROOL
+- NPTOOL
 
 ## Converter
 This converts the RIDF data to root tree.

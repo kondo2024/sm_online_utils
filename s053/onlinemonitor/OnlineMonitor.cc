@@ -19,6 +19,7 @@
 #include "TArtRawSegmentObject.hh"
 #include "TArtEventInfo.hh"
 
+#include "CoinDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 
 //_________________________________________________________________________________
@@ -32,6 +33,7 @@ void stop_interrupt(int) {
 void OnlineMonitor::Init()
 {
   // change for your experiment
+  fProcessorArray.push_back(new CoinDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
 
   fnx=4;
