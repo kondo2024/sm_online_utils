@@ -1,6 +1,5 @@
 #include "NEBULADataProcessor.hh"
 #include <iostream>
-
 #include "TClonesArray.h"
 
 //____________________________________________________________________

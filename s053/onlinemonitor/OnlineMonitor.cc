@@ -20,6 +20,7 @@
 #include "TArtEventInfo.hh"
 
 #include "CoinDataProcessor.hh"
+#include "BDCDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 
 //_________________________________________________________________________________
@@ -34,6 +35,7 @@ void OnlineMonitor::Init()
 {
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
+  fProcessorArray.push_back(new BDCDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
 
   fnx=4;
