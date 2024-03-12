@@ -24,12 +24,18 @@ sm_online_utils
         └── OnlineMonitor.hh
 ```
 
+Required
+
+- ANAROOT
+- NPROOL
+
 ## Converter
 This converts the RIDF data to root tree.
 
 ## Filter
 This extracts and saves detector data which coincide with the SAMURAI
-timestamp.
+timestamp. NPTOOL is required for complation for PFAD
+filter. $NPTOOL_HOME have to be defined.
 
 ### DataMergeFilter
 Sample base class. You can inherit it for your application.
