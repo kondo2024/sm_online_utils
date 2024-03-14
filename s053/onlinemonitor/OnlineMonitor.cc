@@ -195,6 +195,7 @@ void OnlineMonitor::EventLoop()
 
     EEventType event = static_cast<EEventType>(fCanvas->GetEvent());
     if(event == kKeyPress){
+      std::cout<<std::endl;
       int ret = GetKeyCommand();
       if (ret==-1) break;
     }
@@ -298,7 +299,7 @@ int OnlineMonitor::GetKeyCommand()
   while(true){
     gSystem->ProcessEvents();
 
-    std::cout<<"\r [s]: Start, [q]: Stop, [n]:Next, [b]:Prev, [r]:Reset, [p]:Print >"
+    std::cout<<"\r [s]:Start, [q]:Quit, [n]:Next, [b]:Back, [r]:Reset, [p]:Print >"
 	     <<std::flush;
 
     system("stty raw"); 
@@ -324,7 +325,9 @@ int OnlineMonitor::GetKeyCommand()
       TString fname;
       std::cout<<std::endl<<"file name >"<<std::flush;
       std::cin>>fname;
+      std::cout<<"   making "<<fname.Data()<<" ..."<<std::endl;
       Print(fname.Data());
+      std::cout<<" Done"<<std::endl;
 
     } else if (input =='s'){
       std::cout<<std::endl;
