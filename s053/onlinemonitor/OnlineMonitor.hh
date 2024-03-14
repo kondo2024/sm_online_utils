@@ -17,7 +17,7 @@ public:
   ~OnlineMonitor();
 
   void Run();
-  void Draw();
+  bool Draw();
   void ResetHist();
 
   void SetResetCount(Double_t val){fResetCount=val;}
@@ -25,6 +25,8 @@ public:
   void SetNx(Int_t val){fnx=val;}
   void SetNy(Int_t val){fny=val;}
   void DoesReset(Bool_t tf){fDoesReset = tf;}
+
+  void Print(const char* fname="onlinemonitor.pdf");
 
 private:
   void Init();

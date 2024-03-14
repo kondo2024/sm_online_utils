@@ -1,5 +1,5 @@
 // usage
-// root [0] .L macros/OnlineMonitor/OnlineMonitor.cc+g
+// root [0] .L macros/onlinemonitor/OnlineMonitor.cc+g
 // root [1] OnlineMonitor* mon = new OnlineMonitor()
 // root [2] mon->Run()
 //
@@ -31,24 +31,18 @@ void stop_interrupt(int) {
   stoploop = true;
 }
 //_________________________________________________________________________________
-void OnlineMonitor::Init()
-{
-  // change for your experiment
-  fProcessorArray.push_back(new CoinDataProcessor);
-  fProcessorArray.push_back(new BDCDataProcessor);
-  fProcessorArray.push_back(new NEBULADataProcessor);
+void OnlineMonitor::Run(){
 
-  fnx=4;
-  fny=4;
-  fResetCount=20000;
-  fDrawTimeInterval=2;// sec
+  if (!fInitialize) {
+    Init();
+  }
 
-  festore = new TArtEventStore();
-  fNeve = 0;
-  fNeve_monitor = 0;
+  if (!fIsHistBooked) {
+    BookHist();
+    BookUserHist();
+  }
 
-  fInitialize = true;
-
+  EventLoop();
 }
 //_________________________________________________________________________________
 void OnlineMonitor::BookUserHist()
@@ -86,21 +80,6 @@ void OnlineMonitor::FillUserHist()
 //_________________________________________________________________________________
 //_________________________________________________________________________________
 //_________________________________________________________________________________
-// private methods
-//_________________________________________________________________________________
-void OnlineMonitor::Run(){
-
-  if (!fInitialize) {
-    Init();
-  }
-
-  if (!fIsHistBooked) {
-    BookHist();
-    BookUserHist();
-  }
-
-  EventLoop();
-}
 //_________________________________________________________________________________
 OnlineMonitor::OnlineMonitor(TString RidfFile)
   : festore(0),
@@ -114,13 +93,32 @@ OnlineMonitor::OnlineMonitor(TString RidfFile)
   else         fCanvas = gPad->GetCanvas();
 
   std::cout<<"OnlineMonitor::Run()"<<std::endl;
-  //Run();
 }
 //_________________________________________________________________________________
 OnlineMonitor::~OnlineMonitor()
 {
   fRootFile->Close();
   delete festore;
+}
+//_________________________________________________________________________________
+void OnlineMonitor::Init()
+{
+  // change for your experiment
+  fProcessorArray.push_back(new CoinDataProcessor);
+  //fProcessorArray.push_back(new BDCDataProcessor);
+  fProcessorArray.push_back(new NEBULADataProcessor);
+
+  fnx=4;
+  fny=4;
+  fResetCount=20000;
+  fDrawTimeInterval=2;// sec
+
+  festore = new TArtEventStore();
+  fNeve = 0;
+  fNeve_monitor = 0;
+
+  fInitialize = true;
+
 }
 //_________________________________________________________________________________
 void OnlineMonitor::BookHist()
@@ -229,8 +227,10 @@ void OnlineMonitor::EventLoop()
 
 }
 //______________________________________________________________________________
-void OnlineMonitor::Draw()
+bool OnlineMonitor::Draw()
 {
+  bool retval = false;
+
   Int_t nxy = fnx*fny;
 
   Int_t npad=1;
@@ -257,13 +257,14 @@ void OnlineMonitor::Draw()
     f_iplot++;
     if (f_iplot==nhist) {
       f_iplot=0;
+      retval = true;
       break;
     }
 
   }
 
   gPad->Update();
-
+  return retval;
 }
 //_________________________________________________________________________________
 void OnlineMonitor::ResetHist()
@@ -273,6 +274,18 @@ void OnlineMonitor::ResetHist()
     TH1* hist = fHistArray[ihist];
     hist->Reset("M");
   }
+}
+//______________________________________________________________________________
+void OnlineMonitor::Print(const char* fname)
+{
+  fCanvas->Print(Form("%s[",fname));
+  f_iplot=0;
+  bool IsEnd=false;
+  while (!IsEnd){
+    IsEnd = Draw();
+    fCanvas->Print(Form("%s",fname));
+  }
+  fCanvas->Print(Form("%s]",fname));
 }
 //______________________________________________________________________________
 int OnlineMonitor::GetKeyCommand()
@@ -308,7 +321,10 @@ int OnlineMonitor::GetKeyCommand()
       ResetHist();
 
     } else if (input =='p'){
-      std::cout<<std::endl<<"Print is not implemented"<<std::endl;
+      TString fname;
+      std::cout<<std::endl<<"file name >"<<std::flush;
+      std::cin>>fname;
+      Print(fname.Data());
 
     } else if (input =='s'){
       std::cout<<std::endl;
