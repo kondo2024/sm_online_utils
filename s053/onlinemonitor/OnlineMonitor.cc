@@ -20,6 +20,7 @@
 #include "TArtEventInfo.hh"
 
 #include "CoinDataProcessor.hh"
+#include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 
@@ -31,8 +32,8 @@ void stop_interrupt(int) {
   stoploop = true;
 }
 //_________________________________________________________________________________
-void OnlineMonitor::Run(){
-
+void OnlineMonitor::Run()// main 
+{
   if (!fInitialize) {
     Init();
   }
@@ -43,6 +44,27 @@ void OnlineMonitor::Run(){
   }
 
   EventLoop();
+}
+//_________________________________________________________________________________
+void OnlineMonitor::Init()
+{
+  // change for your experiment
+  fProcessorArray.push_back(new CoinDataProcessor);
+  fProcessorArray.push_back(new PlasticDataProcessor);
+  //fProcessorArray.push_back(new BDCDataProcessor);
+  fProcessorArray.push_back(new NEBULADataProcessor);
+
+  fnx=4;
+  fny=4;
+  fResetCount=20000;
+  fDrawTimeInterval=2;// sec
+
+  festore = new TArtEventStore();
+  fNeve = 0;
+  fNeve_monitor = 0;
+
+  fInitialize = true;
+
 }
 //_________________________________________________________________________________
 void OnlineMonitor::BookUserHist()
@@ -99,26 +121,6 @@ OnlineMonitor::~OnlineMonitor()
 {
   fRootFile->Close();
   delete festore;
-}
-//_________________________________________________________________________________
-void OnlineMonitor::Init()
-{
-  // change for your experiment
-  fProcessorArray.push_back(new CoinDataProcessor);
-  //fProcessorArray.push_back(new BDCDataProcessor);
-  fProcessorArray.push_back(new NEBULADataProcessor);
-
-  fnx=4;
-  fny=4;
-  fResetCount=20000;
-  fDrawTimeInterval=2;// sec
-
-  festore = new TArtEventStore();
-  fNeve = 0;
-  fNeve_monitor = 0;
-
-  fInitialize = true;
-
 }
 //_________________________________________________________________________________
 void OnlineMonitor::BookHist()
@@ -249,6 +251,7 @@ bool OnlineMonitor::Draw()
   for(Int_t ihist=0;ihist<nxy;++ihist){
     c1->cd(npad);
 
+    if ( f_iplot >= nhist ) f_iplot = 0;
     TH1* hist = fHistArray[f_iplot];
     if (hist->GetNbinsY()>0) hist->Draw("colz");
     else                     hist->Draw();
@@ -257,7 +260,7 @@ bool OnlineMonitor::Draw()
     if (npad>nxy) npad=1;
     f_iplot++;
     if (f_iplot==nhist) {
-      f_iplot=0;
+      //f_iplot=0;
       retval = true;
       break;
     }
@@ -314,8 +317,13 @@ int OnlineMonitor::GetKeyCommand()
       Draw();
 
     } else if (input =='b'){
-      f_iplot = f_iplot - nxy - 3;
-      if (f_iplot<0) f_iplot = nhist + f_iplot;
+      Int_t num = gPad->GetNumber();
+      f_iplot = nhist - num - nxy;
+      if (f_iplot<0){
+	Int_t remain = nhist%nxy;
+	if (remain==0) f_iplot = nhist - nxy;
+	else           f_iplot = nhist - remain;
+      }
       Draw();
 
     } else if (input =='r'){

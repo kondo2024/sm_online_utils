@@ -27,8 +27,8 @@ void PlasticDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidtl = new TH2D("pla_idtl","Plastic ID TL",10,0.5,10.5,100,0,4000);// up to 10 is temp
-  fhidtr = new TH2D("pla_idtr","Plastic ID TR",10,0.5,10.5,100,0,4000);
+  fhidtl = new TH2D("pla_idtl","Plastic ID TL",10,0.5,10.5,100,0,80000);// up to 10 is temp
+  fhidtr = new TH2D("pla_idtr","Plastic ID TR",10,0.5,10.5,100,0,80000);
   fhidql = new TH2D("pla_idql","Plastic ID QL",10,0.5,10.5,100,0,4000);
   fhidqr = new TH2D("pla_idqr","Plastic ID QR",10,0.5,10.5,100,0,4000);
 
