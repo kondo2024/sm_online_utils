@@ -60,14 +60,16 @@ sample root macro to make plots from merged tree data.
 Online data monitor for checking rawdata during beam time.
 
 ### usage
-1. Add include path of smconverterlib and load libsmconverter.so in root.
+1. Add include path of lib/smconverterlib and load
+   lib/smconverter/libsmconverter.so in rootlogon.C.
 2. ROOT[0] .L OnlineMonitor.cc+g
 3. ROOT[1] OnlineMonitor *mon = new OnlineMonitor() 
    // for online data, input ridf file name for offline analysis 
 4. ROOT[2] mon->Run()
 
 click the canvas and press any key, then analysis is paused and
-several commands will be available.
+several keyboard commands will be available. Ctrl+c stops 
+OnlineMonitor.
 
 - - -
 
