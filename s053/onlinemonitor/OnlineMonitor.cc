@@ -6,6 +6,7 @@
 #include "OnlineMonitor.hh"
 
 #include <iostream>
+#include <csignal>
 
 #include "TSystem.h"
 #include "TPad.h"
