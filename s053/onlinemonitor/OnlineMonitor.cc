@@ -24,6 +24,7 @@
 #include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
+#include "HODPlaDataProcessor.hh"
 
 //_________________________________________________________________________________
 // function to exit loop at keyboard interrupt.
@@ -52,7 +53,8 @@ void OnlineMonitor::Init()
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
   fProcessorArray.push_back(new PlasticDataProcessor);
-  //fProcessorArray.push_back(new BDCDataProcessor);
+  fProcessorArray.push_back(new BDCDataProcessor);
+  fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
 
   fnx=4;
