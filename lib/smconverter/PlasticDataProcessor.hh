@@ -15,8 +15,16 @@ public:
     : SAMURAIDataProcessor()
   {
     fBranchName = "Plastic";
+    fdbpath = "db/";
   }
   ~PlasticDataProcessor(){;}
+
+  PlasticDataProcessor(const char* inputdbpath)
+    : SAMURAIDataProcessor()
+  {
+    fBranchName = "Plastic";
+    fdbpath = inputdbpath;
+  }
 
   virtual void PrepareCalib();
   virtual void PrepareTreeBranches(TTree* tree);
@@ -25,8 +33,12 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
+  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+
 protected:
   TArtCalibPlastic* fCalibPlastic;
+
+  const char* fdbpath;
 
   // histograms
   TH1* fhidtl;

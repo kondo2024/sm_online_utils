@@ -10,22 +10,15 @@
 void BDCDataProcessor::PrepareCalib()
 {
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
-  smprm->LoadParameter("db/SAMURAIBDC1.xml");
-  smprm->LoadParameter("db/SAMURAIBDC2.xml");
+  smprm->LoadParameter(Form("%sSAMURAIBDC1.xml",fdbpath));
+  smprm->LoadParameter(Form("%sSAMURAIBDC2.xml",fdbpath));
 
   fCalibBDC1Hit = new TArtCalibBDC1Hit;
   fCalibBDC2Hit = new TArtCalibBDC2Hit;
   fCalibBDC1Track = new TArtCalibBDC1Track;
   fCalibBDC2Track = new TArtCalibBDC2Track;
 
-  // under construction for loading TDC distributions for 
-  // drift time -> drift distance calibration
-
-  //TFile *file = new TFile(fTDCDistFileName.Data());
-  // temptemptemp...
-
-  LoadDCTDCDistribution("/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root",fCalibBDC1Track, fCalibBDC2Track);
-
+  LoadDCTDCDistribution();
 
   fCalibReady = true;
 }
@@ -139,21 +132,21 @@ void BDCDataProcessor::FillHistograms()
 	  if(TempChi2 > 0) {
 	  
 	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
-	      BDC1_X = TempXPosition;
-  	      BDC1_ThetaX = TMath::ATan(TrackBDC1->GetAngle(0));
+	      fBDC1_X = TempXPosition;
+  	      fBDC1_ThetaX = TMath::ATan(TrackBDC1->GetAngle(0));
 	      MinChi2x = TempChi2;
 	    }	      
 
 	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
-	      BDC1_Y = TempYPosition;
-  	      BDC1_ThetaY = TMath::ATan(TrackBDC1->GetAngle(1));
+	      fBDC1_Y = TempYPosition;
+  	      fBDC1_ThetaY = TMath::ATan(TrackBDC1->GetAngle(1));
 	      MinChi2y = TempChi2;
 	    }	      
 	  }
 	}
       }
 
-    fhxy_bdc1->Fill(BDC1_X,BDC1_Y); 
+    fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
     }  
   }
 
@@ -179,21 +172,21 @@ void BDCDataProcessor::FillHistograms()
 	  if(TempChi2 > 0) {
 	  
 	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
-	      BDC2_X = TempXPosition;
-  	      BDC2_ThetaX = TMath::ATan(TrackBDC2->GetAngle(0));
+	      fBDC2_X = TempXPosition;
+  	      fBDC2_ThetaX = TMath::ATan(TrackBDC2->GetAngle(0));
 	      MinChi2x = TempChi2;
 	    }	      
 
 	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
-	      BDC2_Y = TempYPosition;
-  	      BDC2_ThetaY = TMath::ATan(TrackBDC2->GetAngle(1));
+	      fBDC2_Y = TempYPosition;
+  	      fBDC2_ThetaY = TMath::ATan(TrackBDC2->GetAngle(1));
 	      MinChi2y = TempChi2;
 	    }	      
 	  }
 	}
       }
 
-      fhxy_bdc2->Fill(BDC2_X,BDC2_Y);  
+      fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
     }      
   }
 
@@ -201,8 +194,9 @@ void BDCDataProcessor::FillHistograms()
 }
 //____________________________________________________________________
 
-void BDCDataProcessor::LoadDCTDCDistribution(char *FileName, TArtCalibBDC1Track *CalibBDC1Track, TArtCalibBDC2Track *CalibBDC2Track) {
-  TFile *RootFile = new TFile(FileName,"READ");
+void BDCDataProcessor::LoadDCTDCDistribution() {
+
+  TFile *RootFile = new TFile(fTDCDistFileName,"READ");
 
   if(RootFile) {
     gROOT->cd();
@@ -213,7 +207,7 @@ void BDCDataProcessor::LoadDCTDCDistribution(char *FileName, TArtCalibBDC1Track 
       Hist1D = (TH1D*) RootFile->Get(Form("hbdc1tdc%d",i));
 
       if(Hist1D) {
-	CalibBDC1Track->SetTDCDistribution(Hist1D,i);
+	fCalibBDC1Track->SetTDCDistribution(Hist1D,i);
 	delete Hist1D;
 	Hist1D = NULL;
       }
@@ -225,7 +219,7 @@ void BDCDataProcessor::LoadDCTDCDistribution(char *FileName, TArtCalibBDC1Track 
       Hist1D = (TH1D*) RootFile->Get(Form("hbdc2tdc%d",i));
 
       if(Hist1D) {
-	CalibBDC2Track->SetTDCDistribution(Hist1D,i);
+	fCalibBDC2Track->SetTDCDistribution(Hist1D,i);
 	delete Hist1D;
 	Hist1D = NULL;
       }

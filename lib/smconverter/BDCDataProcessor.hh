@@ -21,6 +21,14 @@ public:
   }
   ~BDCDataProcessor(){;}
 
+  BDCDataProcessor(const char* inputdbpath, const char* inputtdcdistfilename)
+    : SAMURAIDataProcessor()
+  {
+    fBranchName = "BDC";
+    fdbpath = inputdbpath;
+    fTDCDistFileName = inputtdcdistfilename;
+  }
+
   virtual void PrepareCalib();
   virtual void PrepareTreeBranches(TTree* tree);
   virtual void PrepareHistograms();
@@ -28,15 +36,20 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
-  //void SetTDCDistFile(const char* rootfilename){fTDCDistFileName = rootfilename;}
-  
-  void LoadDCTDCDistribution(char *FilenName, TArtCalibBDC1Track *CalibBDC1Track, TArtCalibBDC2Track *CalibBDC2Track);
+
+  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+  void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;}
+
+  void LoadDCTDCDistribution();
 
 protected:
   TArtCalibBDC1Hit*   fCalibBDC1Hit;
   TArtCalibBDC2Hit*   fCalibBDC2Hit;
   TArtCalibBDC1Track* fCalibBDC1Track;
   TArtCalibBDC2Track* fCalibBDC2Track;
+
+  const char* fTDCDistFileName;
+  const char* fdbpath;
 
   // histograms
   TH1* fhidt_bdc1;
@@ -45,8 +58,8 @@ protected:
   TH1* fhxy_bdc2;
 
   //Variables
-  Double_t BDC1_X, BDC1_Y, BDC1_ThetaX, BDC1_ThetaY;
-  Double_t BDC2_X, BDC2_Y, BDC2_ThetaX, BDC2_ThetaY;
+  Double_t fBDC1_X, fBDC1_Y, fBDC1_ThetaX, fBDC1_ThetaY;
+  Double_t fBDC2_X, fBDC2_Y, fBDC2_ThetaX, fBDC2_ThetaY;
 
 };
 

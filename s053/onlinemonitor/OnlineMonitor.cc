@@ -23,6 +23,7 @@
 #include "CoinDataProcessor.hh"
 #include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
+#include "FDCDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 #include "HODPlaDataProcessor.hh"
 
@@ -50,12 +51,21 @@ void OnlineMonitor::Run()// main
 //_________________________________________________________________________________
 void OnlineMonitor::Init()
 {
+  // Path for Input files
+  const char *dbpath = "db/";
+  const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
+
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
-  fProcessorArray.push_back(new PlasticDataProcessor);
-  fProcessorArray.push_back(new BDCDataProcessor);
-  fProcessorArray.push_back(new HODPlaDataProcessor);
-  fProcessorArray.push_back(new NEBULADataProcessor);
+  fProcessorArray.push_back(new PlasticDataProcessor(dbpath));
+  fProcessorArray.push_back(new BDCDataProcessor(dbpath,TDCdist));
+  fProcessorArray.push_back(new FDCDataProcessor(dbpath,TDCdist));
+  fProcessorArray.push_back(new HODPlaDataProcessor(dbpath));
+  fProcessorArray.push_back(new NEBULADataProcessor(dbpath));
+
+
+  // File for TDC distribution of drift chambers
+//  BDCDataProcessor.SetTDCDistFile("/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root");
 
   fnx=4;
   fny=4;

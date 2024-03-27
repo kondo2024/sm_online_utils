@@ -7,7 +7,7 @@
 void HODPlaDataProcessor::PrepareCalib()
 {
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
-  smprm->LoadParameter("db/SAMURAIHOD.xml");
+  smprm->LoadParameter(Form("%sSAMURAIHOD.xml",fdbpath));
 
   fCalibHODPla = new TArtCalibHODPla;
   fCalibReady = true;

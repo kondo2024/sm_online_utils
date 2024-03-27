@@ -15,8 +15,16 @@ public:
     : SAMURAIDataProcessor()
   {
     fBranchName = "HODPla";
+    fdbpath = "db/";
   }
   ~HODPlaDataProcessor(){;}
+
+  HODPlaDataProcessor(const char* inputdbpath)
+    : SAMURAIDataProcessor()
+  {
+    fBranchName = "HODPla";
+    fdbpath = inputdbpath;
+  }
 
   virtual void PrepareCalib();
   virtual void PrepareTreeBranches(TTree* tree);
@@ -25,8 +33,12 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
+  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+
 protected:
   TArtCalibHODPla* fCalibHODPla;
+
+  const char* fdbpath;
 
   // histograms
   TH1* fhidtl;
