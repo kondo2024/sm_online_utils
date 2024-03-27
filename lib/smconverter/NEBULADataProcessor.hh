@@ -17,8 +17,17 @@ public:
       fIncludeHPC(false)
   {
     fBranchName = "NEBULA";
+    fdbpath = "db/";
   }
   ~NEBULADataProcessor(){;}
+
+  NEBULADataProcessor(const char* inputdbpath)
+    : SAMURAIDataProcessor(),
+      fIncludeHPC(false)
+  {
+    fBranchName = "NEBULA";
+    fdbpath = inputdbpath;
+  }
 
   virtual void PrepareCalib();
   virtual void PrepareTreeBranches(TTree* tree);
@@ -28,12 +37,15 @@ public:
   virtual void FillHistograms();
 
   void SetHPC(bool tf){fIncludeHPC = tf;}
+  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
 
 protected:
   bool fIncludeHPC;
 
   TArtCalibNEBULA* fCalibNEBULA;
   TArtCalibNEBULAHPC* fCalibNEBULAHPC;
+
+  const char* fdbpath;
 
   // histograms
   TH1* fhidtu;

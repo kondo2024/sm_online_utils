@@ -1,28 +1,28 @@
-#ifndef _PLASTICDATAPROCESSOR_H_
-#define _PLASTICDATAPROCESSOR_H_
+#ifndef _HODPLADATAPROCESSOR_H_
+#define _HODPLADATAPROCESSOR_H_
 
 #include "SAMURAIDataProcessor.hh"
-#include "TArtCalibPlastic.hh"
+#include "TArtCalibHODPla.hh"
 
 #include "TH1.h"
 #include "TH2.h"
 
-class PlasticDataProcessor : public SAMURAIDataProcessor
+class HODPlaDataProcessor : public SAMURAIDataProcessor
 {
 public: 
 
-  PlasticDataProcessor()
+  HODPlaDataProcessor()
     : SAMURAIDataProcessor()
   {
-    fBranchName = "Plastic";
+    fBranchName = "HODPla";
     fdbpath = "db/";
   }
-  ~PlasticDataProcessor(){;}
+  ~HODPlaDataProcessor(){;}
 
-  PlasticDataProcessor(const char* inputdbpath)
+  HODPlaDataProcessor(const char* inputdbpath)
     : SAMURAIDataProcessor()
   {
-    fBranchName = "Plastic";
+    fBranchName = "HODPla";
     fdbpath = inputdbpath;
   }
 
@@ -36,7 +36,7 @@ public:
   void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
 
 protected:
-  TArtCalibPlastic* fCalibPlastic;
+  TArtCalibHODPla* fCalibHODPla;
 
   const char* fdbpath;
 
