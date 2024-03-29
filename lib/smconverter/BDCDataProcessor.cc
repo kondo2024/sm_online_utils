@@ -10,8 +10,8 @@
 void BDCDataProcessor::PrepareCalib()
 {
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
-  smprm->LoadParameter(Form("%sSAMURAIBDC1.xml",fdbpath));
-  smprm->LoadParameter(Form("%sSAMURAIBDC2.xml",fdbpath));
+  smprm->LoadParameter(fdbfilename1);
+  smprm->LoadParameter(fdbfilename2);
 
   fCalibBDC1Hit = new TArtCalibBDC1Hit;
   fCalibBDC2Hit = new TArtCalibBDC2Hit;

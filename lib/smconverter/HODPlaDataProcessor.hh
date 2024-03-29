@@ -15,15 +15,15 @@ public:
     : SAMURAIDataProcessor()
   {
     fBranchName = "HODPla";
-    fdbpath = "db/";
+    fdbFileName = "db/SAMURAIHOD.xml";
   }
   ~HODPlaDataProcessor(){;}
 
-  HODPlaDataProcessor(const char* inputdbpath)
+  HODPlaDataProcessor(const char* inputdbfilename)
     : SAMURAIDataProcessor()
   {
     fBranchName = "HODPla";
-    fdbpath = inputdbpath;
+    fdbFileName = inputdbfilename;
   }
 
   virtual void PrepareCalib();
@@ -33,12 +33,12 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
-  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+  void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
 
 protected:
   TArtCalibHODPla* fCalibHODPla;
 
-  const char* fdbpath;
+  const char* fdbFileName;
 
   // histograms
   TH1* fhidtl;

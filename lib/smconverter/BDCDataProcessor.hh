@@ -18,14 +18,26 @@ public:
     : SAMURAIDataProcessor()
   {
     fBranchName = "BDC";
+    fdbfilename1 = "db/SAMURAIBDC1.xml";
+    fdbfilename2 = "db/SAMURAIBDC2.xml";
   }
   ~BDCDataProcessor(){;}
 
-  BDCDataProcessor(const char* inputdbpath, const char* inputtdcdistfilename)
+  BDCDataProcessor(const char* inputtdcdistfilename)
     : SAMURAIDataProcessor()
   {
     fBranchName = "BDC";
-    fdbpath = inputdbpath;
+    fdbfilename1 = "db/SAMURAIBDC1.xml";
+    fdbfilename2 = "db/SAMURAIBDC2.xml";
+    fTDCDistFileName = inputtdcdistfilename;
+  }
+
+  BDCDataProcessor(const char* inputdbfilename1,const char* inputdbfilename2, const char* inputtdcdistfilename)
+    : SAMURAIDataProcessor()
+  {
+    fBranchName = "BDC";
+    fdbfilename1 = inputdbfilename1;
+    fdbfilename2 = inputdbfilename2;
     fTDCDistFileName = inputtdcdistfilename;
   }
 
@@ -37,7 +49,8 @@ public:
   virtual void FillHistograms();
 
 
-  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+  void SetdbfilenameBDC1(const char* setdbfilename1){fdbfilename1 = setdbfilename1;}
+  void SetdbfilenameBDC2(const char* setdbfilename2){fdbfilename2 = setdbfilename2;}
   void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;}
 
   void LoadDCTDCDistribution();
@@ -49,7 +62,9 @@ protected:
   TArtCalibBDC2Track* fCalibBDC2Track;
 
   const char* fTDCDistFileName;
-  const char* fdbpath;
+  const char* fdbfilename1;
+  const char* fdbfilename2;
+  
 
   // histograms
   TH1* fhidt_bdc1;

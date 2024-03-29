@@ -15,15 +15,15 @@ public:
     : SAMURAIDataProcessor()
   {
     fBranchName = "Plastic";
-    fdbpath = "db/";
+    fdbFileName = "db/SAMURAIPlastic.xml";
   }
   ~PlasticDataProcessor(){;}
 
-  PlasticDataProcessor(const char* inputdbpath)
+  PlasticDataProcessor(char* inputdbfilename)
     : SAMURAIDataProcessor()
   {
     fBranchName = "Plastic";
-    fdbpath = inputdbpath;
+    fdbFileName = inputdbfilename;
   }
 
   virtual void PrepareCalib();
@@ -33,12 +33,12 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
-  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+  void SetdbFileName(char* setdbfilename){fdbFileName = setdbfilename;}
 
 protected:
   TArtCalibPlastic* fCalibPlastic;
 
-  const char* fdbpath;
+  char* fdbFileName;
 
   // histograms
   TH1* fhidtl;

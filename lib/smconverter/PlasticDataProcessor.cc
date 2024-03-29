@@ -7,7 +7,7 @@
 void PlasticDataProcessor::PrepareCalib()
 {
   TArtBigRIPSParameters *brprm = TArtBigRIPSParameters::Instance();
-  brprm->LoadParameter(Form("%sSAMURAIPlastic.xml",fdbpath));
+  brprm->LoadParameter(fdbFileName);
 
   fCalibPlastic = new TArtCalibPlastic;
   fCalibReady = true;

@@ -17,16 +17,16 @@ public:
       fIncludeHPC(false)
   {
     fBranchName = "NEBULA";
-    fdbpath = "db/";
+    fdbFileName = "db/SAMURAINEBULA.xml";
   }
   ~NEBULADataProcessor(){;}
 
-  NEBULADataProcessor(const char* inputdbpath)
+  NEBULADataProcessor(const char* inputdbfilename)
     : SAMURAIDataProcessor(),
       fIncludeHPC(false)
   {
     fBranchName = "NEBULA";
-    fdbpath = inputdbpath;
+    fdbFileName = inputdbfilename;
   }
 
   virtual void PrepareCalib();
@@ -37,7 +37,7 @@ public:
   virtual void FillHistograms();
 
   void SetHPC(bool tf){fIncludeHPC = tf;}
-  void Setdbpath(const char* setdbpath){fdbpath = setdbpath;}
+  void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
 
 protected:
   bool fIncludeHPC;
@@ -45,7 +45,7 @@ protected:
   TArtCalibNEBULA* fCalibNEBULA;
   TArtCalibNEBULAHPC* fCalibNEBULAHPC;
 
-  const char* fdbpath;
+  const char* fdbFileName;
 
   // histograms
   TH1* fhidtu;

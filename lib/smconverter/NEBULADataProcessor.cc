@@ -6,7 +6,7 @@
 void NEBULADataProcessor::PrepareCalib()
 {
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
-  smprm->LoadParameter(Form("%sNEBULA.xml",fdbpath));
+  smprm->LoadParameter(fdbFileName);
 
   fCalibNEBULA = new TArtCalibNEBULA;
   fCalibReady = true;
