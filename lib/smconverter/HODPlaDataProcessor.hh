@@ -1,28 +1,28 @@
-#ifndef _PLASTICDATAPROCESSOR_H_
-#define _PLASTICDATAPROCESSOR_H_
+#ifndef _HODPLADATAPROCESSOR_H_
+#define _HODPLADATAPROCESSOR_H_
 
 #include "SAMURAIDataProcessor.hh"
-#include "TArtCalibPlastic.hh"
+#include "TArtCalibHODPla.hh"
 
 #include "TH1.h"
 #include "TH2.h"
 
-class PlasticDataProcessor : public SAMURAIDataProcessor
+class HODPlaDataProcessor : public SAMURAIDataProcessor
 {
 public: 
 
-  PlasticDataProcessor()
+  HODPlaDataProcessor()
     : SAMURAIDataProcessor()
   {
-    fBranchName = "Plastic";
-    fdbFileName = "db/SAMURAIPlastic.xml";
+    fBranchName = "HODPla";
+    fdbFileName = "db/SAMURAIHOD.xml";
   }
-  ~PlasticDataProcessor(){;}
+  ~HODPlaDataProcessor(){;}
 
-  PlasticDataProcessor(char* inputdbfilename)
+  HODPlaDataProcessor(const char* inputdbfilename)
     : SAMURAIDataProcessor()
   {
-    fBranchName = "Plastic";
+    fBranchName = "HODPla";
     fdbFileName = inputdbfilename;
   }
 
@@ -33,12 +33,12 @@ public:
   virtual void ClearData();
   virtual void FillHistograms();
 
-  void SetdbFileName(char* setdbfilename){fdbFileName = setdbfilename;}
+  void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
 
 protected:
-  TArtCalibPlastic* fCalibPlastic;
+  TArtCalibHODPla* fCalibHODPla;
 
-  char* fdbFileName;
+  const char* fdbFileName;
 
   // histograms
   TH1* fhidtl;

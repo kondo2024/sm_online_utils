@@ -23,7 +23,10 @@
 #include "CoinDataProcessor.hh"
 #include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
+#include "FDC0DataProcessor.hh"
+#include "FDC2DataProcessor.hh"
 #include "NEBULADataProcessor.hh"
+#include "HODPlaDataProcessor.hh"
 
 //_________________________________________________________________________________
 // function to exit loop at keyboard interrupt.
@@ -49,11 +52,19 @@ void OnlineMonitor::Run()// main
 //_________________________________________________________________________________
 void OnlineMonitor::Init()
 {
+  // Path for Input files
+  const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
+
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
   fProcessorArray.push_back(new PlasticDataProcessor);
-  //fProcessorArray.push_back(new BDCDataProcessor);
+  fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
+  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
+  fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
+  fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
+
+
 
   fnx=4;
   fny=4;
