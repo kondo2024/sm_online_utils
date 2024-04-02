@@ -24,6 +24,7 @@
 #include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
 #include "FDC0DataProcessor.hh"
+#include "FDC1DataProcessor.hh"
 #include "FDC2DataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 #include "HODPlaDataProcessor.hh"
@@ -60,6 +61,7 @@ void OnlineMonitor::Init()
   fProcessorArray.push_back(new PlasticDataProcessor);
   fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
   fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
+  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
   fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
   fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
