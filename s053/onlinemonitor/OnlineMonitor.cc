@@ -59,7 +59,7 @@ void OnlineMonitor::Init()
 
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
-//  fProcessorArray.push_back(new PlasticDataProcessor);
+  fProcessorArray.push_back(new PlasticDataProcessor);
 //  fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
 //  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
 //  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
