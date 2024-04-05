@@ -17,7 +17,7 @@ public:
       fIncludeHPC(false)
   {
     fBranchName = "NEBULA";
-    fdbFileName = "db/SAMURAINEBULA.xml";
+    fdbFileName = "db/NEBULA.xml";
   }
   ~NEBULADataProcessor(){;}
 

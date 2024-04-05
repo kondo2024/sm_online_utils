@@ -71,7 +71,7 @@ void OnlineMonitor::Init()
   fnx=4;
   fny=4;
   fResetCount=20000;
-  fDrawTimeInterval=2;// sec
+  fDrawTimeInterval=5;// sec
 
   festore = new TArtEventStore();
   fNeve = 0;
@@ -87,23 +87,23 @@ void OnlineMonitor::BookUserHist()
 
   // add user histograms
 
-  TH1* fhcoin = new TH1I("hcoin","COIN",8,0.5,8.5);
-//  fhcoin->SetMinimum(0);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
+//  TH1* fhcoin = new TH1I("hcoin","COIN",8,0.5,8.5);
+////  fhcoin->SetMinimum(0);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
+//  fHistArray.push_back(fhcoin);
 
   fIsHistBooked = true;
 }
