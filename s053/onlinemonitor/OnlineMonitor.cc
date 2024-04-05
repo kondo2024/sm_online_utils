@@ -28,6 +28,7 @@
 #include "FDC2DataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 #include "HODPlaDataProcessor.hh"
+#include "NINJADataProcessor.hh"
 
 //_________________________________________________________________________________
 // function to exit loop at keyboard interrupt.
@@ -58,14 +59,14 @@ void OnlineMonitor::Init()
 
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
-  fProcessorArray.push_back(new PlasticDataProcessor);
-  fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
-  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
-  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
-  fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
-  fProcessorArray.push_back(new HODPlaDataProcessor);
-  fProcessorArray.push_back(new NEBULADataProcessor);
-
+//  fProcessorArray.push_back(new PlasticDataProcessor);
+//  fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
+//  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
+//  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
+//  fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
+//  fProcessorArray.push_back(new HODPlaDataProcessor);
+//  fProcessorArray.push_back(new NEBULADataProcessor);
+  fProcessorArray.push_back(new NINJADataProcessor);
 
 
   fnx=4;
