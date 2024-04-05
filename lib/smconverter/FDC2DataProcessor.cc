@@ -35,7 +35,7 @@ void FDC2DataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_fdc2 = new TH2D("fdc2_idtu","FDC2 ID T",128,0.5,128.5,100,0,10000);
+  fhidt_fdc2 = new TH2D("fdc2_idtu","FDC2 ID Traw",1568,0.5,1568.5,100,0,10000);
   fhxy_fdc2 = new TH2D("fdc2_xy","FDC2 XY",100,-80,80, 100,-80,80);
 
   fHistArray.push_back(fhidt_fdc2);

@@ -27,10 +27,10 @@ void HODPlaDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidtl = new TH2D("HODPla_idtl","HODPla ID TL",40,0.5,40.5,100,0,80000);// up to 10 is temp
-  fhidtr = new TH2D("HODPla_idtr","HODPla ID TR",40,0.5,40.5,100,0,80000);
-  fhidql = new TH2D("HODPla_idql","HODPla ID QL",40,0.5,40.5,100,0,10000);
-  fhidqr = new TH2D("HODPla_idqr","HODPla ID QR",40,0.5,40.5,100,0,10000);
+  fhidtl = new TH2D("HODPla_idtl","HODPla ID TLRaw",40,0.5,40.5,100,0,8000);
+  fhidtr = new TH2D("HODPla_idtr","HODPla ID TRRaw",40,0.5,40.5,100,0,8000);
+  fhidql = new TH2D("HODPla_idql","HODPla ID QLRaw",40,0.5,40.5,100,0,5000);
+  fhidqr = new TH2D("HODPla_idqr","HODPla ID QRRaw",40,0.5,40.5,100,0,5000);
 
   fHistArray.push_back(fhidtl);
   fHistArray.push_back(fhidtr);
