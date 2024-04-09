@@ -27,15 +27,21 @@ void NINJADataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidtl = new TH2D("NINJA_idtotu","NINJA ID TOTU",30,0.5,30.5,100,0,80000);// up to 10 is temp
-  fhidtr = new TH2D("NINJA_idtotd","NINJA ID TOTD",30,0.5,30.5,100,0,80000);
-  fhidql = new TH2D("NINJA_idqu","NINJA ID QU",30,0.5,30.5,100,0,10000);
-  fhidqr = new TH2D("NINJA_idqd","NINJA ID QD",30,0.5,30.5,100,0,10000);
+  fhidlelu = new TH2D("NINJA_idlelu","NINJA ID LELU",30,0.5,30.5,100,0,80000);
+  fhidlerd = new TH2D("NINJA_idlerd","NINJA ID LERD",30,0.5,30.5,100,0,80000);
+  fhidtotlu = new TH2D("NINJA_idtotlu","NINJA ID TOTLU",30,0.5,30.5,100,0,80000);// up to 10 is temp
+  fhidtotrd = new TH2D("NINJA_idtotrd","NINJA ID TOTRD",30,0.5,30.5,100,0,80000);
+  fhidtime = new TH2D("NINJA_idtime","NINJA ID time",30,0.5,30.5,100,0,10000);
+  fhidTOT = new TH2D("NINJA_idTOT","NINJA ID TOT",30,0.5,30.5,100,0,10000);
+  fhidxidy = new TH2D("NINJA_idxidy","NINJA IDX IDY",30,0.5,30.5,30,0.5,30.5);
 
-  fHistArray.push_back(fhidtl);
-  fHistArray.push_back(fhidtr);
-  fHistArray.push_back(fhidql);
-  fHistArray.push_back(fhidqr);
+  fHistArray.push_back(fhidlelu);
+  fHistArray.push_back(fhidlerd);
+  fHistArray.push_back(fhidtotlu);
+  fHistArray.push_back(fhidtotrd);
+  fHistArray.push_back(fhidtime);
+  fHistArray.push_back(fhidTOT);
+  fHistArray.push_back(fhidxidy);
 
   // under construction
 }
@@ -56,18 +62,32 @@ void NINJADataProcessor::FillHistograms()
 
   TClonesArray *array = fCalibNINJA->GetNINJAPlaArray();
   int n=array->GetEntries();
+  int id_x = -9999;
+  int id_y = -9999;
+
   for (int i=0;i<n;++i){
     TArtNINJAPla *NINJA = (TArtNINJAPla*)array->At(i);
     Double_t id = NINJA->fID;
-    Double_t TOTUCal = NINJA->fTOTCal[0];
-    Double_t TOTDCal = NINJA->fTOTCal[1];
-    Double_t QUCal = NINJA->fQCal[0];
-    Double_t QDCal = NINJA->fQCal[1];
+    Double_t LERawLU = NINJA->fT_LERaw[0];
+    Double_t LERawRD = NINJA->fT_LERaw[1];
+    Double_t TOTLU = NINJA->fTOTCal[0];
+    Double_t TOTRD = NINJA->fTOTCal[1];
+    Double_t avgtime = (TOTLU + TOTRD)/2.;
+    Double_t avgTOT = pow(TOTLU * TOTRD,0.5);
 
-    fhidtl->Fill(id,TOTUCal);
-    fhidtr->Fill(id,TOTDCal);
-    fhidql->Fill(id,QUCal);
-    fhidqr->Fill(id,QDCal);
-  }
+
+    fhidlelu->Fill(id,LERawLU);
+    fhidlerd->Fill(id,LERawRD);
+    fhidtotlu->Fill(id,TOTLU);
+    fhidtotrd->Fill(id,TOTRD);
+    fhidtime->Fill(id,avgtime);
+    fhidTOT->Fill(id,avgTOT);
+
+    if (id < 18 ) id_x = id;
+    if (id > 17 ) id_y = id;
+
+    if (id_x >-1 && id_y>-1) fhidxidy->Fill(id_x,id_y);
+ 
+ }
 }
 //____________________________________________________________________

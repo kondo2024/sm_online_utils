@@ -41,10 +41,13 @@ protected:
   const char* fdbFileName;
 
   // histograms
-  TH1* fhidtl;
-  TH1* fhidtr;
-  TH1* fhidql;
-  TH1* fhidqr;
+  TH1* fhidlelu;
+  TH1* fhidlerd;
+  TH1* fhidtotlu;
+  TH1* fhidtotrd;
+  TH1* fhidtime;
+  TH1* fhidTOT;
+  TH1* fhidxidy;
 };
 
 #endif

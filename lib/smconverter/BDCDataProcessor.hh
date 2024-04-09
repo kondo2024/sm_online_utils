@@ -8,6 +8,7 @@
 #include "TArtCalibBDC2Track.hh"
 
 #include "TH1.h"
+#include "TVector3.h"
 #include "TH2.h"
 
 class BDCDataProcessor : public SAMURAIDataProcessor
@@ -75,6 +76,7 @@ protected:
   //Variables
   Double_t fBDC1_X, fBDC1_Y, fBDC1_ThetaX, fBDC1_ThetaY;
   Double_t fBDC2_X, fBDC2_Y, fBDC2_ThetaX, fBDC2_ThetaY;
+  //constant
 
 };
 

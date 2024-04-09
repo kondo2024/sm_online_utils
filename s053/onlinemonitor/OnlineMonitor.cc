@@ -23,12 +23,15 @@
 #include "CoinDataProcessor.hh"
 #include "PlasticDataProcessor.hh"
 #include "BDCDataProcessor.hh"
+#include "PDCDataProcessor.hh"
 #include "FDC0DataProcessor.hh"
 #include "FDC1DataProcessor.hh"
 #include "FDC2DataProcessor.hh"
 #include "NEBULADataProcessor.hh"
 #include "HODPlaDataProcessor.hh"
 #include "NINJADataProcessor.hh"
+#include "CATANADataProcessor.hh"
+#include "FSDBSDDataProcessor.hh"
 
 //_________________________________________________________________________________
 // function to exit loop at keyboard interrupt.
@@ -55,24 +58,29 @@ void OnlineMonitor::Run()// main
 void OnlineMonitor::Init()
 {
   // Path for Input files
-  const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
+  //const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
+  const char *TDCdist = "/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/rootfiles/run0978_tdcSpectrum.root";
 
   // change for your experiment
-  fProcessorArray.push_back(new CoinDataProcessor);
-  fProcessorArray.push_back(new PlasticDataProcessor);
-//  fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
-//  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
-//  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
-//  fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
-//  fProcessorArray.push_back(new HODPlaDataProcessor);
-//  fProcessorArray.push_back(new NEBULADataProcessor);
-  fProcessorArray.push_back(new NINJADataProcessor);
+  //fProcessorArray.push_back(new CoinDataProcessor);
+  //fProcessorArray.push_back(new PlasticDataProcessor);
+  //fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
+  fProcessorArray.push_back(new BDCDataProcessor("/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC1.xml","/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC2.xml",TDCdist));
+  fProcessorArray.push_back(new PDCDataProcessor());
+  //fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
+  //fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
+  //fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
+  //fProcessorArray.push_back(new HODPlaDataProcessor);
+  //fProcessorArray.push_back(new NEBULADataProcessor);
+//  fProcessorArray.push_back(new NINJADataProcessor);
+  //fProcessorArray.push_back(new CATANADataProcessor);
+  fProcessorArray.push_back(new FSDBSDDataProcessor);
 
 
   fnx=4;
   fny=4;
   fResetCount=20000;
-  fDrawTimeInterval=2;// sec
+  fDrawTimeInterval=5;// sec
 
   festore = new TArtEventStore();
   fNeve = 0;
@@ -87,24 +95,6 @@ void OnlineMonitor::BookUserHist()
   fRootFile->cd();
 
   // add user histograms
-
-  TH1* fhcoin = new TH1I("hcoin","COIN",8,0.5,8.5);
-//  fhcoin->SetMinimum(0);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
-  fHistArray.push_back(fhcoin);
 
   fIsHistBooked = true;
 }

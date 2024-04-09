@@ -42,10 +42,10 @@ void BDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,10000);
-  fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,10000);
-  fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-80,80, 100,-80,80);
-  fhxy_bdc2 = new TH2D("bdc2_xy","BDC2 XY",100,-80,80, 100,-80,80);
+  fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,3000);
+  fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,3000);
+  fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-50,50, 100,-50,50);
+  fhxy_bdc2 = new TH2D("bdc2_xy","BDC2 XY",100,-50,50, 100,-50,50);
 
   fHistArray.push_back(fhidt_bdc1);
   fHistArray.push_back(fhidt_bdc2);
@@ -189,8 +189,6 @@ void BDCDataProcessor::FillHistograms()
       fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
     }      
   }
-
-
 }
 //____________________________________________________________________
 
