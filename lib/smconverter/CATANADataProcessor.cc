@@ -43,9 +43,9 @@ void CATANADataProcessor::PrepareHistograms()
   fHistArray.push_back(fhidAcal);
   fHistArray.push_back(fhidTcal);
   fHistArray.push_back(fhidAdop);
-  fHistArray.push_back(fhidAdopBe);
-  fHistArray.push_back(fhidAdopLi);
-  fHistArray.push_back(fhidAp);
+//  fHistArray.push_back(fhidAdopBe);
+//  fHistArray.push_back(fhidAdopLi);
+//  fHistArray.push_back(fhidAp);
 
   // under construction
 }

@@ -32,6 +32,8 @@ void PlasticDataProcessor::PrepareHistograms()
   fhidql = new TH2D("pla_idql","Plastic ID QLRaw",10,0.5,10.5,100,0,4000);
   fhidqr = new TH2D("pla_idqr","Plastic ID QRRaw",10,0.5,10.5,100,0,4000);
 
+
+
   fHistArray.push_back(fhidtl);
   fHistArray.push_back(fhidtr);
   fHistArray.push_back(fhidql);
@@ -61,6 +63,7 @@ void PlasticDataProcessor::FillHistograms()
     Double_t trraw = pla->GetTRRaw();
     Double_t qlraw = pla->GetQLRaw();
     Double_t qrraw = pla->GetQRRaw();
+    //if(id==4) std::cout<<"id = "<<id<<" tlraw = "<<tlraw<<" trraw = "<<trraw<<" qlraw = "<<qlraw<<" qrraw="<<qrraw<<std::endl;
 
     fhidtl->Fill(id,tlraw);
     fhidtr->Fill(id,trraw);

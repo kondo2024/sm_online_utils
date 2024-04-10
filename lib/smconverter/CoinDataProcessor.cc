@@ -7,6 +7,7 @@
 void CoinDataProcessor::PrepareCalib()
 {
   fCalibCoin = new TArtCalibCoin;
+  fCalibCoin->SetFpl(13);// for SAMURAI
   fCalibReady = true;
 }
 //____________________________________________________________________

@@ -35,8 +35,8 @@ void FDC2DataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_fdc2 = new TH2D("fdc2_idtu","FDC2 ID Traw",1568,0.5,1568.5,100,0,10000);
-  fhxy_fdc2 = new TH2D("fdc2_xy","FDC2 XY",100,-80,80, 100,-80,80);
+  fhidt_fdc2 = new TH2D("fdc2_idtu","FDC2 ID Traw",1568,0.5,1568.5,100,0,3000);
+  fhxy_fdc2 = new TH2D("fdc2_xy","FDC2 XY",100,-1200,1200, 100,-450,450);
 
   fHistArray.push_back(fhidt_fdc2);
   fHistArray.push_back(fhxy_fdc2);
@@ -123,7 +123,6 @@ void FDC2DataProcessor::LoadDCTDCDistribution() {
    
 
     for(Int_t i=0; i<FDC2NumberOfLayers; i++) {
-      std::cout << i << std::endl;
       Hist1D = (TH1D*) RootFile->Get(Form("hfdc2tdc%d",i));
 
       if(Hist1D) {
