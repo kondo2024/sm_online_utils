@@ -63,7 +63,6 @@ void OnlineMonitor::Init()
   fProcessorArray.push_back(new CoinDataProcessor);
   fProcessorArray.push_back(new PlasticDataProcessor);
   fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
-  fProcessorArray.push_back(new FDC0DataProcessor(TDCdist));
   fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
   fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
   fProcessorArray.push_back(new HODPlaDataProcessor);
