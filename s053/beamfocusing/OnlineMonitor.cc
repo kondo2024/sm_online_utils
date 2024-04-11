@@ -57,11 +57,17 @@ void OnlineMonitor::Init()
 {
   // Path for Input files
   //const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
-  const char *TDCdist = "/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/rootfiles/run0978_tdcSpectrum.root";
+  //const char *TDCdist = "rootfiles/dctdc/run0978_tdcSpectrum.root";
+  //const char *TDCdist = "rootfiles/dctdc/run0178_tdcSpectrum.root";
+  //const char *TDCdist = "rootfiles/dctdc/run0175_tdcSpectrum.root";
+  //const char *TDCdist = "rootfiles/dctdc/run0126_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0215_tdcSpectrum.root";
+  // const char *TDCdist = "rootfiles/dctdc/run0257_tdcSpectrum.root";
 
   // change for your experiment
     //fProcessorArray.push_back(new BDCDataProcessor(TDCdist));
-    fProcessorArray.push_back(new BDCDataProcessor("/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC1.xml","/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC2.xml",TDCdist));
+    //fProcessorArray.push_back(new BDCDataProcessor("/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC1.xml","/home/s053/exp/exp2301_s053/anaroot/users/lipj/macros/DCCalib/db/SAMURAIBDC2.xml",TDCdist));
+    fProcessorArray.push_back(new BDCDataProcessor("db/SAMURAIBDC1.xml","db/SAMURAIBDC2.xml",TDCdist));
 
 
   fnx=3;
@@ -104,6 +110,9 @@ void OnlineMonitor::FillUserHist()
   TArtStoreManager *sman = TArtStoreManager::Instance();
   //TClonesArray *a = sman->FindDataContainer("NEBULAPla");
 
+  // if BDC1 and BDC2 are good, then make the target XY
+  bool isBDC1OK = false;
+  bool isBDC2OK = false;
   // BDC1 Track
   TClonesArray *BDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC1Track");
   
@@ -140,6 +149,7 @@ void OnlineMonitor::FillUserHist()
 	}
       }
 
+      isBDC1OK = true;
     //fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
     }  
   }
@@ -180,27 +190,43 @@ void OnlineMonitor::FillUserHist()
 	}
       }
 
+      isBDC2OK = true;
       //fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
     }      
   }
-  //Target Position
-  TVector3 bdc1Position;
-  TVector3 bdc2Position;
-  TVector3 beamDirection;
-  TVector3 targetPosition;
-  bdc1Position.SetXYZ(fBDC1_X,fBDC1_Y,BDC1_Z);
-  bdc2Position.SetXYZ(fBDC2_X,fBDC2_Y,BDC2_Z);
-
-  beamDirection=bdc2Position-bdc1Position;
-  beamDirection=beamDirection.Unit();
-  targetPosition =bdc1Position +  (Target_Z-bdc1Position.Z())/beamDirection.Z()*beamDirection;
-  fhxy_target->Fill(targetPosition.X(),targetPosition.Y());
-  fhxthx_target->Fill(targetPosition.X(),atan(beamDirection.X()/beamDirection.Z())*1000.);// mrad
-  fhythy_target->Fill(targetPosition.Y(),atan(beamDirection.Y()/beamDirection.Z())*1000.);
-  fhx_target->Fill(targetPosition.X()); // add by WX
-  fhy_target->Fill(targetPosition.Y()); // add by WX
+  if(isBDC1OK&&isBDC2OK){
+	  //Target Position
+	  TVector3 bdc1Position;
+	  TVector3 bdc2Position;
+	  TVector3 beamDirection;
+	  TVector3 targetPosition;
+	  beamDirection.Clear();
+	  bdc1Position.Clear();
+	  bdc2Position.Clear();
+	  targetPosition.Clear();
 
 
+	  bdc1Position.SetXYZ(fBDC1_X,fBDC1_Y,BDC1_Z);
+	  bdc2Position.SetXYZ(fBDC2_X,fBDC2_Y,BDC2_Z);
+
+	  beamDirection=bdc2Position-bdc1Position;
+	  beamDirection=beamDirection.Unit();
+
+	  targetPosition =bdc1Position +  (Target_Z-bdc1Position.Z())/beamDirection.Z()*beamDirection;
+
+	  fhxy_target->Fill(targetPosition.X(),targetPosition.Y());
+	  fhxthx_target->Fill(targetPosition.X(),atan(beamDirection.X()/beamDirection.Z())*1000.);// mrad
+	  fhythy_target->Fill(targetPosition.Y(),atan(beamDirection.Y()/beamDirection.Z())*1000.);
+	  fhx_target->Fill(targetPosition.X()); // add by WX
+	  fhy_target->Fill(targetPosition.Y()); // add by WX
+
+	  ////For test
+	  //beamDirection.Print();
+	  //bdc1Position.Print();
+	  //bdc2Position.Print();
+	  //targetPosition.Print();
+
+  }
 
 }
 //_________________________________________________________________________________

@@ -55,8 +55,8 @@ protected:
   Double_t fBDC1_X, fBDC1_Y, fBDC1_ThetaX, fBDC1_ThetaY;
   Double_t fBDC2_X, fBDC2_Y, fBDC2_ThetaX, fBDC2_ThetaY;
   //constant
-  Double_t BDC1_Z  =-1988.94;
-  Double_t BDC2_Z  =-989.18;
+  Double_t BDC1_Z  =-1996.44;
+  Double_t BDC2_Z  =-996.68;
   Double_t Target_Z=0;
 
 
