@@ -6,6 +6,7 @@
 #include "TH2.h"
 #include "TCanvas.h"
 
+#include "TArtPlastic.hh"
 #include "TArtEventStore.hh"
 #include "SAMURAIDataProcessor.hh"
 
@@ -62,6 +63,7 @@ private:
 
   // user histograms
   // TH1* fhcoin;
+   TH2* fhpla_pid;
 
   ClassDef(OnlineMonitor,1);
 };

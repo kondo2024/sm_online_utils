@@ -30,6 +30,9 @@
 #include "HODPlaDataProcessor.hh"
 #include "NINJADataProcessor.hh"
 #include "CATANADataProcessor.hh"
+#include "FSDBSDDataProcessor.hh"
+#include "PDCDataProcessor.hh"
+
 
 //_________________________________________________________________________________
 // function to exit loop at keyboard interrupt.
@@ -56,8 +59,7 @@ void OnlineMonitor::Run()// main
 void OnlineMonitor::Init()
 {
   // Path for Input files
-  //const char *TDCdist = "/home/tpohl/online_analysis/files_for_online_analysis/dcdist_0537.root";
-  const char *TDCdist = "rootfiles/dctdc/run0126_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0175_tdcSpectrum.root";
 
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
@@ -67,11 +69,11 @@ void OnlineMonitor::Init()
   fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
   fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
-  fProcessorArray.push_back(new NINJADataProcessor);
+  //fProcessorArray.push_back(new NINJADataProcessor);
   //fProcessorArray.push_back(new FSDBSDDataProcessor);
   fProcessorArray.push_back(new CATANADataProcessor);
-
-
+  fProcessorArray.push_back(new PDCDataProcessor);
+  
 
   fnx=4;
   fny=4;
@@ -91,6 +93,9 @@ void OnlineMonitor::BookUserHist()
   fRootFile->cd();
 
   // add user histograms
+  fhpla_pid = new TH2D("pla_pid","PLA ToF713-dE13",500,-23000,-20500,500,400,1200);
+  fHistArray.push_back(fhpla_pid);
+
 
   fIsHistBooked = true;
 }
@@ -99,6 +104,36 @@ void OnlineMonitor::FillUserHist()
 {
   TArtStoreManager *sman = TArtStoreManager::Instance();
   //TClonesArray *a = sman->FindDataContainer("NEBULAPla");
+
+  //--------------------------------------
+  // Beam PID
+  TClonesArray *pla_array = (TClonesArray*)sman->FindDataContainer("BigRIPSPlastic");
+
+  TArtPlastic *F7Pla = 0;
+  TArtPlastic *F13Pla_1 = 0;
+
+  int n=pla_array->GetEntries();
+  for (Int_t i=0;i<n;++i){
+    TArtPlastic* pla = (TArtPlastic*)pla_array->At(i);
+    Int_t ID= pla->GetID();
+    if (ID==3){// F7 plastic
+      F7Pla = pla;
+    }else if (ID==4){
+      F13Pla_1 = pla;
+    }
+  }
+
+  if (F7Pla !=0 && F13Pla_1 !=0){
+    double F7T = 0.5*(F7Pla->GetTLRaw()+F7Pla->GetTRRaw());
+    double F13T1 = 0.5*(F13Pla_1->GetTLRaw()+F13Pla_1->GetTRRaw());
+    double F7Q = sqrt(F7Pla->GetQLRaw()*F7Pla->GetQRRaw());
+    double F13Q1 = sqrt(F13Pla_1->GetQLRaw()*F13Pla_1->GetQRRaw());
+    fhpla_pid->Fill(F13T1-F7T,F7Q);
+  }
+
+  //--------------------------------------
+
+
 }
 //_________________________________________________________________________________
 //_________________________________________________________________________________
