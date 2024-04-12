@@ -69,8 +69,8 @@ void OnlineMonitor::Init()
   fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
   fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
-  //fProcessorArray.push_back(new NINJADataProcessor);
-  //fProcessorArray.push_back(new FSDBSDDataProcessor);
+  fProcessorArray.push_back(new NINJADataProcessor);
+  fProcessorArray.push_back(new FSDBSDDataProcessor);
   fProcessorArray.push_back(new CATANADataProcessor);
   fProcessorArray.push_back(new PDCDataProcessor);
   
@@ -95,6 +95,16 @@ void OnlineMonitor::BookUserHist()
   // add user histograms
   fhpla_pid = new TH2D("pla_pid","PLA ToF713-dE13",500,-23000,-20500,500,400,1200);
   fHistArray.push_back(fhpla_pid);
+  
+   
+  //fheff_bdc1 = new TH2D("bdc1_eff","BDC1 when BDC2&FDC1 hit",100,-50,50, 100,-50,50);
+  //fheff_bdc2 = new TH2D("bdc2_eff","BDC2 when BDC1&FDC1 hit",100,-50,50, 100,-50,50);
+  //fheff_fdc1 = new TH2D("fdc1_eff","FDC1 when BDC1&BDC2 hit",100,-150,150, 100,-150,150);
+  fheff      = new TH1D("heff","Efficiency for BDC1 BDC2 FDC1",6,0.5,3.5);
+  fHistArray.push_back(fheff_bdc1);
+  fHistArray.push_back(fheff_bdc2);
+  fHistArray.push_back(fheff_fdc1);
+  fHistArray.push_back(fheff);
 
 
   fIsHistBooked = true;
@@ -130,6 +140,159 @@ void OnlineMonitor::FillUserHist()
     double F13Q1 = sqrt(F13Pla_1->GetQLRaw()*F13Pla_1->GetQRRaw());
     fhpla_pid->Fill(F13T1-F7T,F7Q);
   }
+
+  //--------------------------------------
+  // check efficiency of DCs
+  //
+  bool isBDC1OK = false;
+  bool isBDC2OK = false;
+  bool isFDC1OK = false;
+  double fBDC1_X = -9999, fBDC1_Y= -9999,fBDC1_ThetaX= -9999,fBDC1_ThetaY= -9999;
+  double fBDC2_X = -9999, fBDC2_Y= -9999,fBDC2_ThetaX= -9999,fBDC2_ThetaY= -9999;
+  double fFDC1_X = -9999, fFDC1_Y= -9999,fFDC1_ThetaX= -9999,fFDC1_ThetaY= -9999;
+
+  // BDC1 Track
+  TClonesArray *BDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC1Track");
+  
+  if (BDC1Tracks) {
+    Int_t BDC1NumberOfTracks = BDC1Tracks->GetEntries();
+    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+//    std::cout << BDC1NumberOfTracks << std::endl;
+    if(BDC1NumberOfTracks > 0) {
+      TArtDCTrack *TrackBDC1;
+      
+      for(Int_t i = 0; i<BDC1NumberOfTracks; i++) {
+        TrackBDC1 = (TArtDCTrack *)BDC1Tracks->At(i);
+        
+	if(TrackBDC1) {
+
+	  TempXPosition = TrackBDC1->GetPosition(0);
+  	  TempYPosition = TrackBDC1->GetPosition(1);
+	  TempChi2 = TrackBDC1->GetChi2() / (Double_t)TrackBDC1->GetNDF();
+ 
+	  if(TempChi2 > 0) {
+	  
+	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+	      fBDC1_X = TempXPosition;
+  	      fBDC1_ThetaX = TMath::ATan(TrackBDC1->GetAngle(0));
+	      MinChi2x = TempChi2;
+	    }	      
+
+	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+	      fBDC1_Y = TempYPosition;
+  	      fBDC1_ThetaY = TMath::ATan(TrackBDC1->GetAngle(1));
+	      MinChi2y = TempChi2;
+	    }	      
+	  }
+	}
+      }
+
+      isBDC1OK = true;
+    }  
+  }
+
+  // BDC2 Track
+  TClonesArray *BDC2Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC2Track");
+
+  if (BDC2Tracks) {
+    Int_t BDC2NumberOfTracks = BDC2Tracks->GetEntries();
+    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+
+    if(BDC2NumberOfTracks > 0) {
+      TArtDCTrack *TrackBDC2;
+      
+      for(Int_t i = 0; i<BDC2NumberOfTracks; i++) {
+        TrackBDC2 = (TArtDCTrack *)BDC2Tracks->At(i);
+        
+	if(TrackBDC2) {
+
+	  TempXPosition = TrackBDC2->GetPosition(0);
+  	  TempYPosition = TrackBDC2->GetPosition(1);
+	  TempChi2 = TrackBDC2->GetChi2() / (Double_t)TrackBDC2->GetNDF();
+
+	  if(TempChi2 > 0) {
+	  
+	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+	      fBDC2_X = TempXPosition;
+  	      fBDC2_ThetaX = TMath::ATan(TrackBDC2->GetAngle(0));
+	      MinChi2x = TempChi2;
+	    }	      
+
+	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+	      fBDC2_Y = TempYPosition;
+  	      fBDC2_ThetaY = TMath::ATan(TrackBDC2->GetAngle(1));
+	      MinChi2y = TempChi2;
+	    }	      
+	  }
+	}
+      }
+
+      isBDC2OK = true;
+    }      
+  }
+
+  // FDC1 Track
+  TClonesArray *FDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIFDC1Track");
+
+  if (FDC1Tracks) {
+    Int_t FDC1NumberOfTracks = FDC1Tracks->GetEntries();
+    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+
+    if(FDC1NumberOfTracks > 0) {
+      TArtDCTrack *TrackFDC1;
+      
+      for(Int_t i = 0; i<FDC1NumberOfTracks; i++) {
+        TrackFDC1 = (TArtDCTrack *)FDC1Tracks->At(i);
+        
+	if(TrackFDC1) {
+
+	  TempXPosition = TrackFDC1->GetPosition(0);
+  	  TempYPosition = TrackFDC1->GetPosition(1);
+	  TempChi2 = TrackFDC1->GetChi2() / (Double_t)TrackFDC1->GetNDF();
+
+	  if(TempChi2 > 0) {
+	  
+	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+	      fFDC1_X = TempXPosition;
+  	      fFDC1_ThetaX = TMath::ATan(TrackFDC1->GetAngle(0));
+	      MinChi2x = TempChi2;
+	    }	      
+
+	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+	      fFDC1_Y = TempYPosition;
+  	      fFDC1_ThetaY = TMath::ATan(TrackFDC1->GetAngle(1));
+	      MinChi2y = TempChi2;
+	    }	      
+	  }
+	}
+      }
+
+      isFDC1OK = true;
+      //fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
+    }      
+  }
+
+  bool isDSBOK = false;
+  for(int i=0;i<8;i++){
+	  CoinDataProcessor *test = (CoinDataProcessor*)fProcessorArray[0];
+	  if(test->GetCoinBit(i)&&i==1){isDSBOK = true;}
+  }    
+
+  if(isDSBOK&&isBDC1OK&&isBDC2OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40) fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
+  if(isDSBOK&&isBDC1OK&&isFDC1OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc2->Fill(fBDC2_X,fBDC2_Y);
+  if(isDSBOK&&isBDC2OK&&isFDC1OK&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc1->Fill(fBDC1_X,fBDC1_Y);
+
+  fheff->SetBinContent(1, (double)(fheff_bdc1->Integral())/fheff_bdc1->GetEntries()*100);
+  fheff->SetBinContent(3, (double)(fheff_bdc2->Integral())/fheff_bdc2->GetEntries()*100);
+  fheff->SetBinContent(5, (double)(fheff_fdc1->Integral())/fheff_fdc1->GetEntries()*100);
+
+  if((int)fheff_bdc1->GetEntries()%100==0){
+	  cout<<Form("BDC1 Eff = %4.2f percent",(double)(fheff_bdc1->Integral())/(double)(fheff_bdc1->GetEntries())*100)<<endl;
+	  cout<<Form("BDC2 Eff = %4.2f percent",(double)(fheff_bdc2->Integral())/(double)(fheff_bdc2->GetEntries())*100)<<endl;
+	  cout<<Form("FDC1 Eff = %4.2f percent",(double)(fheff_fdc1->Integral())/(double)(fheff_fdc1->GetEntries())*100)<<endl;
+  }
+
+
 
   //--------------------------------------
 

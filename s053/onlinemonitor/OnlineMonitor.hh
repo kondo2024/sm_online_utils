@@ -64,6 +64,10 @@ private:
   // user histograms
   // TH1* fhcoin;
    TH2* fhpla_pid;
+   TH2* fheff_bdc1;
+   TH2* fheff_bdc2;
+   TH2* fheff_fdc1;
+   TH1* fheff;
 
   ClassDef(OnlineMonitor,1);
 };
