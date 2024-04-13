@@ -1,4 +1,4 @@
-TARGETS = smts_converter plastics_converter dc_converter nebula_converter
+TARGETS = smts_converter plastics_converter dc_converter nebula_converter bdc_converter pdc_converter fdc1_converter fdc2_converter
 
 SRCS  = $(wildcard *.cc)
 OBJS  = $(notdir $(SRCS:.cc=.o))
@@ -17,6 +17,18 @@ plastics_converter: plastics_converter.cc $(SMCONVLIB)
 
 dc_converter: dc_converter.cc $(SMCONVLIB)
 	$(CXX) $(LDFLAGS) -o $@ dc_converter.o $(SMCONVLIB)
+
+bdc_converter: bdc_converter.cc $(SMCONVLIB)
+	$(CXX) $(LDFLAGS) -o $@ bdc_converter.o $(SMCONVLIB)
+
+pdc_converter: pdc_converter.cc $(SMCONVLIB)
+	$(CXX) $(LDFLAGS) -o $@ pdc_converter.o $(SMCONVLIB)
+
+fdc1_converter: fdc1_converter.cc $(SMCONVLIB)
+	$(CXX) $(LDFLAGS) -o $@ fdc1_converter.o $(SMCONVLIB)
+
+fdc2_converter: fdc2_converter.cc $(SMCONVLIB)
+	$(CXX) $(LDFLAGS) -o $@ fdc2_converter.o $(SMCONVLIB)
 
 nebula_converter: nebula_converter.cc $(SMCONVLIB)
 	$(CXX) $(LDFLAGS) -o $@ nebula_converter.o $(SMCONVLIB)

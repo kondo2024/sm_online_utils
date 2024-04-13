@@ -331,6 +331,7 @@ void OnlineMonitor::BookHist()
   for (Int_t ip=0;ip<np;++ip){
     SAMURAIDataProcessor *p = fProcessorArray[ip];
     p->MakeHistograms(true);
+    fRootFile->cd();
     p->PrepareHistograms();
 
     vector<TH1*>* arr = p->GetHistArray();
