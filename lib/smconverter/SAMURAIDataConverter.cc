@@ -6,7 +6,8 @@ SAMURAIDataConverter::SAMURAIDataConverter()
   : fRIDFFileName(""), 
     fOutputFileName("converted.root"),fOutputFile(0), 
     fTreeName("tree"), fTree(0), 
-    fDoesFillTree(false)
+    fDoesFillTree(false),
+    fNeveMax(-1)
 {
   fEventStore = new TArtEventStore;
 }
@@ -24,7 +25,8 @@ void SAMURAIDataConverter::Run()
     return;
   }
 
-  fOutputFile = new TFile(fOutputFileName.Data(),"recreate");
+  //fOutputFile = new TFile(fOutputFileName.Data(),"recreate");
+  fOutputFile = new TFile(fOutputFileName.Data(),"new");// avoid overwrite
   if (!fOutputFile->IsOpen()){
     std::cout<<"cannot open file:"<<fOutputFileName.Data()<<std::endl;
     return;
@@ -80,7 +82,7 @@ void SAMURAIDataConverter::EventLoop()
 
   int np = fProcessorList.size();
   ULong64_t neve=0;
-  while(fEventStore->GetNextEvent()){
+  while(fEventStore->GetNextEvent() && (fNeveMax<0 || (fNeveMax>0 && neve< (ULong64_t)fNeveMax) )){
     if (neve%1000==0){
       std::cout<<"\r  Converting ...     "<<neve<<" Events"<<std::flush;
     }

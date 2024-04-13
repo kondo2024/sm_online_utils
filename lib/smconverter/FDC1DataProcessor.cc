@@ -123,7 +123,6 @@ void FDC1DataProcessor::LoadDCTDCDistribution() {
    
 
     for(Int_t i=0; i<FDC1NumberOfLayers; i++) {
-      std::cout << i << std::endl;
       Hist1D = (TH1D*) RootFile->Get(Form("hfdc1tdc%d",i));
 
       if(Hist1D) {

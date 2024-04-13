@@ -6,14 +6,17 @@ using namespace std;
 
 int main(int argc, char **argv){
 
-  if (argc<3){
-    std::cout<<"usage: nebula_converter ridffile outputfile"
+  if (argc<2){
+    //std::cout<<"usage: nebula_converter ridffile outputfile"
+    std::cout<<"usage: smts_converter RunNum"
              <<std::endl;
     return 0;
   }
 
-  TString fname_ridf(argv[1]);
-  TString fname_out(argv[2]);
+  Int_t nRun = atoi(argv[1]);
+
+  TString fname_ridf(Form("ridf/sdaq04/data%04d.ridf.gz",nRun));
+  TString fname_out(Form("rootfiles/ts/smts%04d.root",nRun));
 
   SAMURAIDataConverter converter;
   converter.SetRIDFFileName(fname_ridf.Data());

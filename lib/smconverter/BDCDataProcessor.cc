@@ -60,6 +60,8 @@ void BDCDataProcessor::ClearData()
   fCalibBDC2Hit->ClearData();
   fCalibBDC1Track->ClearData();
   fCalibBDC2Track->ClearData();
+  fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
+  fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
 }
 //____________________________________________________________________
 void BDCDataProcessor::ReconstructData()
@@ -146,6 +148,7 @@ void BDCDataProcessor::FillHistograms()
 	}
       }
 
+    //std::cout<<fBDC1_X<<" "<<fBDC1_Y<<std::endl;
     fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
     }  
   }

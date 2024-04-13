@@ -31,8 +31,8 @@ void NEBULADataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidtu = new TH2D("nebula_idtu","NEBULA ID TuRaw",144,0.5,144.5,100,0,4000);
-  fhidtd = new TH2D("nebula_idtd","NEBULA ID TdRaw",144,0.5,144.5,100,0,4000);
+  fhidtu = new TH2D("nebula_idtu","NEBULA ID TuRaw",184,0.5,184.5,100,0,40000);
+  fhidtd = new TH2D("nebula_idtd","NEBULA ID TdRaw",184,0.5,184.5,100,0,40000);
   fhidqu = new TH2D("nebula_idqu","NEBULA ID QuRaw",144,0.5,144.5,100,0,4000);
   fhidqd = new TH2D("nebula_idqd","NEBULA ID QdRaw",144,0.5,144.5,100,0,4000);
 

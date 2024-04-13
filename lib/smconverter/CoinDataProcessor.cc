@@ -48,3 +48,8 @@ void CoinDataProcessor::FillHistograms()
     if (fBit[i]) fhcoin->Fill(i);
 }
 //____________________________________________________________________
+bool CoinDataProcessor::GetCoinBit(int i)
+{
+    return fBit[i];
+}
+//____________________________________________________________________

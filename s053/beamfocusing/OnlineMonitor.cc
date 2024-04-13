@@ -61,7 +61,7 @@ void OnlineMonitor::Init()
   //const char *TDCdist = "rootfiles/dctdc/run0178_tdcSpectrum.root";
   //const char *TDCdist = "rootfiles/dctdc/run0175_tdcSpectrum.root";
   //const char *TDCdist = "rootfiles/dctdc/run0126_tdcSpectrum.root";
-  const char *TDCdist = "rootfiles/dctdc/run0215_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0278_tdcSpectrum.root";
   // const char *TDCdist = "rootfiles/dctdc/run0257_tdcSpectrum.root";
 
   // change for your experiment
@@ -113,13 +113,16 @@ void OnlineMonitor::FillUserHist()
   // if BDC1 and BDC2 are good, then make the target XY
   bool isBDC1OK = false;
   bool isBDC2OK = false;
+  fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
+  fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
+ 
   // BDC1 Track
   TClonesArray *BDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC1Track");
   
   if (BDC1Tracks) {
     Int_t BDC1NumberOfTracks = BDC1Tracks->GetEntries();
     Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
-//    std::cout << BDC1NumberOfTracks << std::endl;
+    //std::cout << BDC1NumberOfTracks << std::endl;
     if(BDC1NumberOfTracks > 0) {
       TArtDCTrack *TrackBDC1;
       
@@ -131,6 +134,7 @@ void OnlineMonitor::FillUserHist()
 	  TempXPosition = TrackBDC1->GetPosition(0);
   	  TempYPosition = TrackBDC1->GetPosition(1);
 	  TempChi2 = TrackBDC1->GetChi2() / (Double_t)TrackBDC1->GetNDF();
+          //cout<<TempXPosition<<" "<<TempYPosition<<" "<<TempChi2<<endl;
  
 	  if(TempChi2 > 0) {
 	  
@@ -194,7 +198,7 @@ void OnlineMonitor::FillUserHist()
       //fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
     }      
   }
-  if(isBDC1OK&&isBDC2OK){
+  if(isBDC1OK&&isBDC2OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
 	  //Target Position
 	  TVector3 bdc1Position;
 	  TVector3 bdc2Position;
@@ -219,12 +223,6 @@ void OnlineMonitor::FillUserHist()
 	  fhythy_target->Fill(targetPosition.Y(),atan(beamDirection.Y()/beamDirection.Z())*1000.);
 	  fhx_target->Fill(targetPosition.X()); // add by WX
 	  fhy_target->Fill(targetPosition.Y()); // add by WX
-
-	  ////For test
-	  //beamDirection.Print();
-	  //bdc1Position.Print();
-	  //bdc2Position.Print();
-	  //targetPosition.Print();
 
   }
 

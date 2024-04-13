@@ -44,9 +44,9 @@ protected:
   TH1* fhidt1;
   TH1* fhidt2;
   TH1* fhidt3;
-  TH1* fhidt1_trl;
-  TH1* fhidt2_trl;
-  TH1* fhidt3_trl;
+  TH1* fhidtot1;
+  TH1* fhidtot2;
+  TH1* fhidtot3;
 };
 
 #endif

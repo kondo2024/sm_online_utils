@@ -29,14 +29,14 @@ void CATANADataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidAraw = new TH2D("catana_idAraw","CATANA ID Araw",10,0.5,10.5,100,0,80000);// up to 10 is temp
-  fhidTraw = new TH2D("catana_idTraw","CATANA ID Traw",10,0.5,10.5,100,0,80000);
-  fhidAcal = new TH2D("catana_idAcal","CATANA ID Acal",10,0.5,10.5,100,0,4000);
-  fhidTcal = new TH2D("catana_idTcal","CATANA ID Tcal",10,0.5,10.5,100,0,4000);
-  fhidAdop = new TH2D("catana_idAdop","CATANA Adop QR",10,0.5,10.5,100,0,4000);
-  fhidAdopBe = new TH2D("catana_idAdopBe","CATANA ID AdopBe",10,0.5,10.5,100,0,4000);
-  fhidAdopLi = new TH2D("catana_idAdopLi","CATANA ID AdopLi",10,0.5,10.5,100,0,4000);
-  fhidAp = new TH2D("catana_idAp","CATANA ID Ap",10,0.5,10.5,100,0,4000);
+  fhidAraw = new TH2D("catana_idAraw","CATANA ID Araw",120,-0.5,121.5,400,0,4095);// up to 10 is temp
+  fhidTraw = new TH2D("catana_idTraw","CATANA ID Traw",120,-0.5,121.5,400,0,4095);
+  fhidAcal = new TH2D("catana_idAcal","CATANA ID Acal",120,-0.5,121.5,1000,0,20000);
+  fhidTcal = new TH2D("catana_idTcal","CATANA ID Tcal",120,-0.5,121.5,1000,0,20000);
+  fhidAdop = new TH2D("catana_idAdop","CATANA Adop QR",120,0.5,120.5,500,0,20000);
+  fhidAdopBe = new TH2D("catana_idAdopBe","CATANA ID AdopBe",120,0.5,120.5,500,0,4000);
+  fhidAdopLi = new TH2D("catana_idAdopLi","CATANA ID AdopLi",120,0.5,120.5,500,0,4000);
+  fhidAp = new TH2D("catana_idAp","CATANA ID Ap",140,0.5,140.5,100,0,4000);
 
   fHistArray.push_back(fhidAraw);
   fHistArray.push_back(fhidTraw);
@@ -71,7 +71,7 @@ void CATANADataProcessor::FillHistograms()
     Double_t Traw = ca->GetRawTDC();
     Double_t Acal = ca->GetEnergy();
     Double_t Tcal = ca->GetTime();
-    Double_t Adop = ca->GetDoppCorEnergy();
+    Double_t Adop = ca->GetDoppCorEnergy(); // need to put the right beta value
 //    Double_t AdopBe = ca->GetTLRaw();
 //    Double_t AdopLi = ca->GetTLRaw();
 //    Double_t Ap = ca->GetTLRaw();

@@ -42,8 +42,9 @@ void stop_interrupt(int) {
   stoploop = true;
 }
 //_________________________________________________________________________________
-void OnlineMonitor::Run()// main 
+void OnlineMonitor::Run(ULong64_t nmax)// main 
 {
+  if(nmax>0) fNeveMax = nmax ;
   if (!fInitialize) {
     Init();
   }
@@ -97,13 +98,13 @@ void OnlineMonitor::BookUserHist()
   fHistArray.push_back(fhpla_pid);
   
    
-  //fheff_bdc1 = new TH2D("bdc1_eff","BDC1 when BDC2&FDC1 hit",100,-50,50, 100,-50,50);
-  //fheff_bdc2 = new TH2D("bdc2_eff","BDC2 when BDC1&FDC1 hit",100,-50,50, 100,-50,50);
-  //fheff_fdc1 = new TH2D("fdc1_eff","FDC1 when BDC1&BDC2 hit",100,-150,150, 100,-150,150);
+  fheff_bdc1 = new TH2D("bdc1_eff","BDC1 when BDC2&FDC1 hit",100,-50,50, 100,-50,50);
+  fheff_bdc2 = new TH2D("bdc2_eff","BDC2 when BDC1&FDC1 hit",100,-50,50, 100,-50,50);
+  fheff_fdc1 = new TH2D("fdc1_eff","FDC1 when BDC1&BDC2 hit",100,-150,150, 100,-150,150);
   fheff      = new TH1D("heff","Efficiency for BDC1 BDC2 FDC1",6,0.5,3.5);
-  fHistArray.push_back(fheff_bdc1);
-  fHistArray.push_back(fheff_bdc2);
-  fHistArray.push_back(fheff_fdc1);
+  //fHistArray.push_back(fheff_bdc1);
+  //fHistArray.push_back(fheff_bdc2);
+  //fHistArray.push_back(fheff_fdc1);
   fHistArray.push_back(fheff);
 
 
@@ -389,7 +390,7 @@ void OnlineMonitor::EventLoop()
       std::cout<<"\r"<<fNeve_monitor<<" events for display, "
 	       <<fNeve<<" events analyzed"<<std::flush;
 
-    if (stoploop) {
+    if (stoploop || (fNeve>=fNeveMax)) {
       stoploop = false;
       break;
     }

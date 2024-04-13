@@ -29,10 +29,10 @@ void NINJADataProcessor::PrepareHistograms()
 
   fhidlelu = new TH2D("NINJA_idlelu","NINJA ID LELU",30,0.5,30.5,100,0,80000);
   fhidlerd = new TH2D("NINJA_idlerd","NINJA ID LERD",30,0.5,30.5,100,0,80000);
-  fhidtotlu = new TH2D("NINJA_idtotlu","NINJA ID TOTLU",30,0.5,30.5,100,0,80000);// up to 10 is temp
-  fhidtotrd = new TH2D("NINJA_idtotrd","NINJA ID TOTRD",30,0.5,30.5,100,0,80000);
-  fhidtime = new TH2D("NINJA_idtime","NINJA ID time",30,0.5,30.5,100,0,10000);
-  fhidTOT = new TH2D("NINJA_idTOT","NINJA ID TOT",30,0.5,30.5,100,0,10000);
+  fhidtotlu = new TH2D("NINJA_idtotlu","NINJA ID TOTLU",30,0.5,30.5,100,0,100);// up to 10 is temp
+  fhidtotrd = new TH2D("NINJA_idtotrd","NINJA ID TOTRD",30,0.5,30.5,100,0,100);
+  fhidtime = new TH2D("NINJA_idtime","NINJA ID time average",30,0.5,30.5,100,0,100);
+  fhidTOT = new TH2D("NINJA_idTOT","NINJA ID TOT average",30,0.5,30.5,100,0,100);
   fhidxidy = new TH2D("NINJA_idxidy","NINJA IDX IDY",30,0.5,30.5,30,0.5,30.5);
 
   fHistArray.push_back(fhidlelu);

@@ -24,6 +24,7 @@ public:
   virtual void ReconstructData();
   virtual void ClearData();
   virtual void FillHistograms();
+  virtual bool GetCoinBit(int i);
 
 protected:
   TArtCalibCoin* fCalibCoin;

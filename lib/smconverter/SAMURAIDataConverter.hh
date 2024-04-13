@@ -27,6 +27,8 @@ public:
   void PrepareHistograms();
   void EventLoop();
 
+  void SetMaxEventNumber(Long64_t nevemax){fNeveMax=nevemax;}
+
 protected:
   TString fRIDFFileName;
 
@@ -40,6 +42,8 @@ protected:
   bool fDoesFillTree;
 
   TArtEventStore* fEventStore;
+
+  Long64_t fNeveMax;
 
 };
 

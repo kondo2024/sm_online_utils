@@ -11,13 +11,15 @@
 #include "SAMURAIDataProcessor.hh"
 
 #include <vector>
+#include <limits>
 
 class OnlineMonitor : public TObject {
 public:
   OnlineMonitor(TString RidfFile="online");
   ~OnlineMonitor();
 
-  void Run();
+  void Run(ULong64_t);
+  void Run() { Run(1e12);} ;
   bool Draw();
   void ResetHist();
 
@@ -37,6 +39,7 @@ private:
   void FillUserHist();
 
   void EventLoop();
+
   int  GetKeyCommand();
 
   TCanvas* fCanvas;
@@ -56,6 +59,7 @@ private:
   Bool_t fDoesReset;
 
   ULong64_t fNeve;
+  ULong64_t fNeveMax;
   ULong64_t fNeve_monitor;
   Int_t f_iplot;
 
