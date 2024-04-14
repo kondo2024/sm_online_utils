@@ -18,7 +18,7 @@ int main(int argc, char **argv){
   Int_t nRun = atoi(argv[1]);
 
   TString fname_ridf(Form("ridf/sdaq04/data%04d.ridf.gz",nRun));
-  TString fname_out(Form("rootfiles/dc/bdc%04d.root",nRun));
+  TString fname_out(Form("rootfiles/dc/bdc_%04d.root",nRun));
 
   SAMURAIDataConverter converter;
   //converter.SetMaxEventNumber(100);// temp for check
