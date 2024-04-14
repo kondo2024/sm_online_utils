@@ -26,7 +26,6 @@ void PDCDataProcessor::PrepareTreeBranches(TTree *tree)
   TClonesArray *pdchit_array = fCalibPDCHit->GetDCHitArray();
   TClonesArray *pdctrack_array = fCalibPDCTrack->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &pdchit_array);// is it necessary?
   fTree->Branch(fBranchName.Data(), &pdctrack_array);
 }
 //____________________________________________________________________

@@ -27,9 +27,9 @@ void FSDBSDDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt1   = new TH2D("fsdbsd_idt1","FSDBSD ID T1Raw",66,0.5,66.5,100,0,8000);
-  fhidt2   = new TH2D("fsdbsd_idt2","FSDBSD ID T2Raw",66,0.5,66.5,100,0,8000);
-  fhidt3   = new TH2D("fsdbsd_idt3","FSDBSD ID T3Raw",66,0.5,66.5,100,0,8000);
+  fhidt1   = new TH2D("fsdbsd_idt1","FSDBSD ID T1Raw",66,0.5,66.5,100,25000,40000);
+  fhidt2   = new TH2D("fsdbsd_idt2","FSDBSD ID T2Raw",66,0.5,66.5,100,25000,40000);
+  fhidt3   = new TH2D("fsdbsd_idt3","FSDBSD ID T3Raw",66,0.5,66.5,100,25000,40000);
   fhidtot1 = new TH2D("fsdbsd_idtot1","FSDBSD ID ToT1Raw",66,0.5,66.5,100,0,2000);
   fhidtot2 = new TH2D("fsdbsd_idtot2","FSDBSD ID ToT2Raw",66,0.5,66.5,100,0,2000);
   fhidtot3 = new TH2D("fsdbsd_idtot3","FSDBSD ID ToT3Raw",66,0.5,66.5,100,0,2000);

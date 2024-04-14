@@ -27,7 +27,6 @@ void FDC0DataProcessor::PrepareTreeBranches(TTree *tree)
   TClonesArray *fdc0hit_array = fCalibFDC0Hit->GetDCHitArray();
   TClonesArray *fdc0track_array = fCalibFDC0Track->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &fdc0hit_array);// is it necessary?
   fTree->Branch(fBranchName.Data(), &fdc0track_array);
 }
 //____________________________________________________________________

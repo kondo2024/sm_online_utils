@@ -32,8 +32,6 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
   TClonesArray *bdc1track_array = fCalibBDC1Track->GetDCTrackArray();
   TClonesArray *bdc2track_array = fCalibBDC2Track->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &bdc1hit_array);// is it necessary?
-  fTree->Branch(fBranchName.Data(), &bdc2hit_array);// is it necessary?
   fTree->Branch(fBranchName.Data(), &bdc1track_array);
   fTree->Branch(fBranchName.Data(), &bdc2track_array);
 }
