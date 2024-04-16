@@ -41,6 +41,7 @@ public:
 
 protected:
   bool fIncludeHPC;
+  bool fVeto_fired;
 
   TArtCalibNEBULA* fCalibNEBULA;
   TArtCalibNEBULAHPC* fCalibNEBULAHPC;

@@ -32,7 +32,7 @@ void CATANADataProcessor::PrepareHistograms()
   fhidAraw = new TH2D("catana_idAraw","CATANA ID Araw",120,-0.5,121.5,400,0,4095);// up to 10 is temp
   fhidTraw = new TH2D("catana_idTraw","CATANA ID Traw",120,-0.5,121.5,400,0,4095);
   fhidAcal = new TH2D("catana_idAcal","CATANA ID Acal",120,-0.5,121.5,1000,0,20000);
-  fhidTcal = new TH2D("catana_idTcal","CATANA ID Tcal",120,-0.5,121.5,1000,0,20000);
+  fhidTcal = new TH2D("catana_idTcal","CATANA ID Tcal",120,-0.5,121.5,1000,-500,20000);
   fhidAdop = new TH2D("catana_idAdop","CATANA Adop QR",120,0.5,120.5,500,0,20000);
   fhidAdopBe = new TH2D("catana_idAdopBe","CATANA ID AdopBe",120,0.5,120.5,500,0,4000);
   fhidAdopLi = new TH2D("catana_idAdopLi","CATANA ID AdopLi",120,0.5,120.5,500,0,4000);

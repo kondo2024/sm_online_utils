@@ -19,6 +19,7 @@ void NEBULADataProcessor::PrepareTreeBranches(TTree *tree)
   TClonesArray *array = fCalibNEBULA->GetNEBULAPlaArray();
   fTree = tree;
   fTree->Branch(fBranchName.Data(), &array);
+  fTree->Branch("NEBULA.VETO_fired", &fVeto_fired,"VETO_fired/O");
 
   if (fIncludeHPC){
     fCalibNEBULAHPC = new TArtCalibNEBULAHPC;
@@ -58,6 +59,20 @@ void NEBULADataProcessor::ReconstructData()
   if (fIncludeHPC){
     fCalibNEBULAHPC->ReconstructData();
   }  
+  fVeto_fired = false ;
+  TClonesArray *array = fCalibNEBULA->GetNEBULAPlaArray();
+  int n=array->GetEntries();
+  for (int i=0;i<n;++i){
+    TArtNEBULAPla *pla = (TArtNEBULAPla*)array->At(i);
+    Double_t id = pla->GetID();
+    Double_t turaw = pla->GetTURaw();
+    Double_t tdraw = pla->GetTDRaw();
+    if(id>140 && turaw>0 && tdraw>0){
+      fVeto_fired = true ;
+      return ;
+    }
+  }
+
 }
 //____________________________________________________________________
 void NEBULADataProcessor::FillHistograms()
