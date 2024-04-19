@@ -70,8 +70,8 @@ void OnlineMonitor::Init()
   fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
   fProcessorArray.push_back(new HODPlaDataProcessor);
   fProcessorArray.push_back(new NEBULADataProcessor);
-  fProcessorArray.push_back(new NINJADataProcessor);
-  fProcessorArray.push_back(new FSDBSDDataProcessor);
+  //fProcessorArray.push_back(new NINJADataProcessor);
+  //fProcessorArray.push_back(new FSDBSDDataProcessor);
   fProcessorArray.push_back(new CATANADataProcessor);
   fProcessorArray.push_back(new PDCDataProcessor);
   
