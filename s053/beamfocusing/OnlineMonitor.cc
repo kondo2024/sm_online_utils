@@ -13,7 +13,9 @@
 #include "TCanvas.h"
 #include "TDatime.h"
 #include "TText.h"
+#include "TEllipse.h"
 #include "TClonesArray.h"
+
 
 #include "TArtStoreManager.hh"
 #include "TArtRawEventObject.hh"
@@ -383,6 +385,14 @@ bool OnlineMonitor::Draw()
     TH1* hist = fHistArray[f_iplot];
     if (hist->GetNbinsY()>0) hist->Draw("colz");
     else                     hist->Draw();
+    if(string(hist->GetName())=="target_xy"){
+            TEllipse *el1 = new TEllipse(0.0,0.0,15,15);
+            el1->SetFillStyle(0);
+            el1->SetLineWidth(2);
+            el1->SetLineStyle(2);
+            el1->Draw();
+    }
+
 
     npad++;
     if (npad>nxy) npad=1;
