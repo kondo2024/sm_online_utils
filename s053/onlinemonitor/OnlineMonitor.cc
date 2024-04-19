@@ -287,10 +287,11 @@ void OnlineMonitor::FillUserHist()
   fheff->SetBinContent(3, (double)(fheff_bdc2->Integral())/fheff_bdc2->GetEntries()*100);
   fheff->SetBinContent(5, (double)(fheff_fdc1->Integral())/fheff_fdc1->GetEntries()*100);
 
-  if((int)fheff_bdc1->GetEntries()%100==0){
-	  cout<<Form("BDC1 Eff = %4.2f percent",(double)(fheff_bdc1->Integral())/(double)(fheff_bdc1->GetEntries())*100)<<endl;
-	  cout<<Form("BDC2 Eff = %4.2f percent",(double)(fheff_bdc2->Integral())/(double)(fheff_bdc2->GetEntries())*100)<<endl;
-	  cout<<Form("FDC1 Eff = %4.2f percent",(double)(fheff_fdc1->Integral())/(double)(fheff_fdc1->GetEntries())*100)<<endl;
+  //if((int)fheff_bdc1->GetEntries()%100==0){
+  if(fNeve==1000 || fNeve%5000==0 ){
+    cout<<endl<<Form("BDC1 Eff = %4.2f percent",(double)(fheff_bdc1->Integral())/(double)(fheff_bdc1->GetEntries())*100)<<endl;
+    cout<<Form("BDC2 Eff = %4.2f percent",(double)(fheff_bdc2->Integral())/(double)(fheff_bdc2->GetEntries())*100)<<endl;
+    cout<<Form("FDC1 Eff = %4.2f percent",(double)(fheff_fdc1->Integral())/(double)(fheff_fdc1->GetEntries())*100)<<endl;
   }
 
 
@@ -388,8 +389,7 @@ void OnlineMonitor::EventLoop()
   while(true){
     gSystem->ProcessEvents();
     if (fNeve%100==0)
-      std::cout<<"\r"<<fNeve_monitor<<" events for display, "
-	       <<fNeve<<" events analyzed"<<std::flush;
+	std::cout<<"\r"<<fNeve<<" events analyzed"<<std::flush;
 
     if (stoploop || (fNeve>=fNeveMax)) {
       stoploop = false;
@@ -413,6 +413,9 @@ void OnlineMonitor::EventLoop()
     if (datime.GetTime() - datime_old.GetTime() > fDrawTimeInterval){
       //neve_rate = (Double_t)fNeve/(datime.GetTime() - datime_old.GetTime());
 
+      std::cout<<"\r"<<fNeve<<" events analyzed,"
+	       <<fNeve_monitor<<" events for display"<<std::flush;
+		 
       Draw();
       //std::cout<<"\r    "<<fNeve_monitor<<" evts are accumulated (Ctrl+C for stop) "<<std::flush;
       fRootFile->Write();
