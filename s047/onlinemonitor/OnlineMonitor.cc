@@ -102,6 +102,10 @@ void OnlineMonitor::BookUserHist()
   fheff_bdc2 = new TH2D("bdc2_eff","BDC2 when BDC1&FDC1 hit",100,-50,50, 100,-50,50);
   fheff_fdc1 = new TH2D("fdc1_eff","FDC1 when BDC1&BDC2 hit",100,-150,150, 100,-150,150);
   fheff      = new TH1D("heff","Efficiency for BDC1 BDC2 FDC1",6,0.5,3.5);
+
+  fheff->SetMinimum(0.);
+  fheff->SetMinimum(100.);
+
   //fHistArray.push_back(fheff_bdc1);
   //fHistArray.push_back(fheff_bdc2);
   //fHistArray.push_back(fheff_fdc1);
@@ -283,15 +287,24 @@ void OnlineMonitor::FillUserHist()
   if(isDSBOK&&isBDC1OK&&isFDC1OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc2->Fill(fBDC2_X,fBDC2_Y);
   if(isDSBOK&&isBDC2OK&&isFDC1OK&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc1->Fill(fBDC1_X,fBDC1_Y);
 
-  fheff->SetBinContent(1, (double)(fheff_bdc1->Integral())/fheff_bdc1->GetEntries()*100);
-  fheff->SetBinContent(3, (double)(fheff_bdc2->Integral())/fheff_bdc2->GetEntries()*100);
-  fheff->SetBinContent(5, (double)(fheff_fdc1->Integral())/fheff_fdc1->GetEntries()*100);
+  double eff_bdc1 = 0.;
+  double eff_bdc2 = 0.;
+  double eff_fdc1 = 0.;
+
+  if (fheff_bdc1->GetEntries()>0) eff_bdc1 = fheff_bdc1->Integral()/fheff_bdc1->GetEntries()*100;
+  if (fheff_bdc2->GetEntries()>0) eff_bdc2 = fheff_bdc2->Integral()/fheff_bdc2->GetEntries()*100;
+  if (fheff_fdc1->GetEntries()>0) eff_fdc1 = fheff_fdc1->Integral()/fheff_fdc1->GetEntries()*100;
+
+  fheff->SetBinContent(1, eff_bdc1);
+  fheff->SetBinContent(3, eff_bdc2);
+  fheff->SetBinContent(5, eff_fdc1);
 
   //if((int)fheff_bdc1->GetEntries()%100==0){
   if(fNeve==1000 || fNeve%5000==0 ){
-    cout<<endl<<Form("BDC1 Eff = %4.2f percent",(double)(fheff_bdc1->Integral())/(double)(fheff_bdc1->GetEntries())*100)<<endl;
-    cout<<Form("BDC2 Eff = %4.2f percent",(double)(fheff_bdc2->Integral())/(double)(fheff_bdc2->GetEntries())*100)<<endl;
-    cout<<Form("FDC1 Eff = %4.2f percent",(double)(fheff_fdc1->Integral())/(double)(fheff_fdc1->GetEntries())*100)<<endl;
+    cout<<endl;
+    cout<<Form("BDC1 Eff = %4.2f percent",eff_bdc1)<<endl;
+    cout<<Form("BDC2 Eff = %4.2f percent",eff_bdc2)<<endl;
+    cout<<Form("FDC1 Eff = %4.2f percent",eff_fdc1)<<endl;
   }
 
 
