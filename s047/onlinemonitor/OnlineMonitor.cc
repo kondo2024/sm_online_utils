@@ -104,7 +104,7 @@ void OnlineMonitor::BookUserHist()
   fheff      = new TH1D("heff","Efficiency for BDC1 BDC2 FDC1",6,0.5,3.5);
 
   fheff->SetMinimum(0.);
-  fheff->SetMinimum(100.);
+  fheff->SetMaximum(110.);
 
   //fHistArray.push_back(fheff_bdc1);
   //fHistArray.push_back(fheff_bdc2);
