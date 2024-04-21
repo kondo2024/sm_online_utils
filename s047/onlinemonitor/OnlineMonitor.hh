@@ -5,6 +5,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TCanvas.h"
+#include "TCutG.h"
 
 #include "TArtPlastic.hh"
 #include "TArtEventStore.hh"
@@ -30,6 +31,7 @@ public:
   void DoesReset(Bool_t tf){fDoesReset = tf;}
 
   void Print(const char* fname="onlinemonitor.pdf");
+  void LoadBeamInterestedCut();
 
 private:
   void Init();
@@ -67,6 +69,9 @@ private:
 
   // user histograms
   // TH1* fhcoin;
+  Int_t NumBeamInterested = 0;
+  Int_t NumBeam = 0;
+  TCutG *beamInterestedCut;
    TH2* fhpla_pid;
    TH2* fheff_bdc1;
    TH2* fheff_bdc2;

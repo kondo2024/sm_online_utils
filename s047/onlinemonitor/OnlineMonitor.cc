@@ -87,6 +87,8 @@ void OnlineMonitor::Init()
 
   fInitialize = true;
 
+
+  LoadBeamInterestedCut();
 }
 //_________________________________________________________________________________
 void OnlineMonitor::BookUserHist()
@@ -114,6 +116,42 @@ void OnlineMonitor::BookUserHist()
 
   fIsHistBooked = true;
 }
+void OnlineMonitor::LoadBeamInterestedCut()
+{
+   //beamInterestedCut = new TCutG("beam10Be",10);
+   //beamInterestedCut->SetVarX("PLA ToF713-dE13");
+   //beamInterestedCut->SetVarY("");
+   //beamInterestedCut->SetTitle("Graph");
+   //beamInterestedCut->SetFillColor(1);
+   //beamInterestedCut->SetPoint(0,-22885.2,685.505);
+   //beamInterestedCut->SetPoint(1,-22919.4,604.072);
+   //beamInterestedCut->SetPoint(2,-22895,472.15);
+   //beamInterestedCut->SetPoint(3,-22870.5,411.889);
+   //beamInterestedCut->SetPoint(4,-22816.7,426.547);
+   //beamInterestedCut->SetPoint(5,-22775.9,560.098);
+   //beamInterestedCut->SetPoint(6,-22764.5,665.961);
+   //beamInterestedCut->SetPoint(7,-22803.6,711.564);
+   //beamInterestedCut->SetPoint(8,-22867.2,698.534);
+   //beamInterestedCut->SetPoint(9,-22885.2,685.505);
+ 
+   beamInterestedCut = new TCutG("beam4He",11);
+   beamInterestedCut->SetPoint(0,-22326.4,406.304);
+   beamInterestedCut->SetPoint(1,-22377.9,367.748);
+   beamInterestedCut->SetPoint(2,-22382.8,325.52);
+   beamInterestedCut->SetPoint(3,-22341.1,299.816);
+   beamInterestedCut->SetPoint(4,-22211.1,290.636);
+   beamInterestedCut->SetPoint(5,-22135.1,320.012);
+   beamInterestedCut->SetPoint(6,-22115.5,386.108);
+   beamInterestedCut->SetPoint(7,-22140,424.663);
+   beamInterestedCut->SetPoint(8,-22257.8,426.499);
+   beamInterestedCut->SetPoint(9,-22299.5,417.319);
+   beamInterestedCut->SetPoint(10,-22326.4,406.304);
+
+   beamInterestedCut->SetLineColor(2);
+   beamInterestedCut->SetLineWidth(2);
+   beamInterestedCut->SetLineStyle(2);
+}
+
 //______________________________________________________________________________
 void OnlineMonitor::FillUserHist()
 {
@@ -144,7 +182,18 @@ void OnlineMonitor::FillUserHist()
     double F7Q = sqrt(F7Pla->GetQLRaw()*F7Pla->GetQRRaw());
     double F13Q1 = sqrt(F13Pla_1->GetQLRaw()*F13Pla_1->GetQRRaw());
     fhpla_pid->Fill(F13T1-F7T,F7Q);
+    NumBeam++;
+    if(beamInterestedCut->IsInside(F13T1-F7T,F7Q)) NumBeamInterested++;
+ 
+
   }
+  if(fNeve==1000 || fNeve%5000==0 ){
+    cout<<endl;
+    cout<<Form("Beam interested = %4.2f percent",(double)NumBeamInterested/(double)NumBeam*100)<<endl;
+  }
+
+
+
 
   //--------------------------------------
   // check efficiency of DCs
@@ -470,8 +519,22 @@ bool OnlineMonitor::Draw()
 
     if ( f_iplot >= nhist ) f_iplot = 0;
     TH1* hist = fHistArray[f_iplot];
+
+    if(string(hist->GetName())=="pla_pid"){
+	    hist->SetTitle(Form("Beam Interested/Total = %4.2f percent",(double)NumBeamInterested/(double)NumBeam*100));
+	    //beamInterestedCut->Draw("same");
+    }
+
+
     if (hist->GetNbinsY()>0) hist->Draw("colz");
     else                     hist->Draw();
+
+    if(string(hist->GetName())=="pla_pid"){
+	    beamInterestedCut->Draw("same");
+    }
+
+
+
 
     npad++;
     if (npad>nxy) npad=1;

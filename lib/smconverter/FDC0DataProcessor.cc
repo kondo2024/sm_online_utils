@@ -2,6 +2,7 @@
 #include <iostream>
 #include "TClonesArray.h"
 #include "TFile.h"
+#include "TDirectory.h"
 #include "TArtSAMURAIParameters.hh"
 #include "TArtDCHit.hh"
 #include "TArtDCTrack.hh"
@@ -114,6 +115,8 @@ void FDC0DataProcessor::FillHistograms()
 //____________________________________________________________________
 
 void FDC0DataProcessor::LoadDCTDCDistribution() {
+  TDirectory *pwd = gDirectory;
+
   TFile *RootFile = new TFile(fTDCDistFileName,"READ");
 
   if(RootFile) {
@@ -134,5 +137,6 @@ void FDC0DataProcessor::LoadDCTDCDistribution() {
     }
   }
 
+  pwd->cd();
 }
 

@@ -2,6 +2,7 @@
 #include <iostream>
 #include "TClonesArray.h"
 #include "TFile.h"
+#include "TDirectory.h"
 #include "TArtSAMURAIParameters.hh"
 #include "TArtDCHit.hh"
 #include "TArtDCTrack.hh"
@@ -113,6 +114,8 @@ void FDC2DataProcessor::FillHistograms()
 //____________________________________________________________________
 
 void FDC2DataProcessor::LoadDCTDCDistribution() {
+  TDirectory *pwd = gDirectory;
+
   TFile *RootFile = new TFile(fTDCDistFileName,"READ");
 
   if(RootFile) {
@@ -133,6 +136,8 @@ void FDC2DataProcessor::LoadDCTDCDistribution() {
       std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hfdc2tdc%d",i) << "\e  [0m" << std::endl;
     }
   }
+
+  pwd->cd();
 
 }
 
