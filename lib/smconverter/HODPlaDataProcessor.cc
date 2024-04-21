@@ -52,8 +52,6 @@ void HODPlaDataProcessor::ReconstructData()
 //____________________________________________________________________
 void HODPlaDataProcessor::FillHistograms()
 {
-  ReconstructData();
-
   TClonesArray *array = fCalibHODPla->GetHODPlaArray();
   int n=array->GetEntries();
   for (int i=0;i<n;++i){

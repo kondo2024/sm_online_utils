@@ -54,8 +54,6 @@ void FSDBSDDataProcessor::ReconstructData()
 //____________________________________________________________________
 void FSDBSDDataProcessor::FillHistograms()
 {
-  ReconstructData();
-
   TClonesArray *array = fCalibFSDBSD->GetFSDBSDPlaArray();
   int n=array->GetEntries();
   for (int i=0;i<n;++i){

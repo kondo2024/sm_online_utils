@@ -58,8 +58,6 @@ void NINJADataProcessor::ReconstructData()
 //____________________________________________________________________
 void NINJADataProcessor::FillHistograms()
 {
-  ReconstructData();
-
   TClonesArray *array = fCalibNINJA->GetNINJAPlaArray();
   int n=array->GetEntries();
   int id_x = -9999;
