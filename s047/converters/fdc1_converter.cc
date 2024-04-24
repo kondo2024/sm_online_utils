@@ -28,7 +28,7 @@ int main(int argc, char **argv){
 
   converter.SetOutputTreeName("t_FDC1");
 
-  const char *TDCdist = "rootfiles/dctdc/run0309_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0628_tdcSpectrum.root";// s47 11Li run
 
   FDC1DataProcessor fdc1(TDCdist);
   fdc1.MakeTreeBranches(true);

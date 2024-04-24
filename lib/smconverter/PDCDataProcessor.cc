@@ -33,7 +33,7 @@ void PDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_pdc = new TH2D("pdc_idtu","PDC ID Traw",816,0.5,816.5,100,0,3000);
+  fhidt_pdc = new TH2D("pdc_idt","PDC ID Traw",816,0.5,816.5,100,0,3000);
   fhxy_pdc = new TH2D("pdc_xy","PDC XY",100,-900,900, 100,-450,450);
 
   fHistArray.push_back(fhidt_pdc);
@@ -69,45 +69,14 @@ void PDCDataProcessor::FillHistograms()
 
   // PDC Track
   TClonesArray *PDCTracks = fCalibPDCTrack->GetDCTrackArray();
-  
-  if (PDCTracks) {
-    Int_t PDCNumberOfTracks = PDCTracks->GetEntries();
-    Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
-//    std::cout << BDC1NumberOfTracks << std::endl;
-    if(PDCNumberOfTracks > 0) {
-      TArtDCTrack *TrackPDC;
-      
-      for(Int_t i = 0; i<PDCNumberOfTracks; i++) {
-        TrackPDC = (TArtDCTrack *)PDCTracks->At(i);
-        
-	if(TrackPDC) {
-
-	  TempXPosition = TrackPDC->GetPosition(0);
-  	  TempYPosition = TrackPDC->GetPosition(1);
-	  TempChi2 = TrackPDC->GetChi2() / (Double_t)TrackPDC->GetNDF();
- 
-	  if(TempChi2 > 0) {
-	  
-	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
-	      fPDC_X = TempXPosition;
-  	      fPDC_ThetaX = TMath::ATan(TrackPDC->GetAngle(0));
-	      MinChi2x = TempChi2;
-	    }	      
-
-	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
-	      fPDC_Y = TempYPosition;
-  	      fPDC_ThetaY = TMath::ATan(TrackPDC->GetAngle(1));
-	      MinChi2y = TempChi2;
-	    }	      
-	  }
-	}
-      }
-
-    fhxy_pdc->Fill(fPDC_X,fPDC_Y); 
-    }  
+  TArtDCTrack *track = (TArtDCTrack*)PDCTracks->At(0);
+  if (track!=0){
+    Double_t x = track->GetPosition(0);
+    Double_t y = track->GetPosition(1);
+//    Double_t a = TMath::ATan(track->GetAngle(0))*1000.;// mrad
+//    Double_t b = TMath::ATan(track->GetAngle(1))*1000.;
+    fhxy_pdc->Fill(x,y);
   }
-
-
 
 }
 //____________________________________________________________________

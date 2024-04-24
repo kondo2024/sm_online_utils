@@ -60,7 +60,8 @@ void OnlineMonitor::Run(ULong64_t nmax)// main
 void OnlineMonitor::Init()
 {
   // Path for Input files
-  const char *TDCdist = "rootfiles/dctdc/run0175_tdcSpectrum.root";
+  //const char *TDCdist = "rootfiles/dctdc/run0617_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0628_tdcSpectrum.root";// 11Li run
 
   // change for your experiment
   fProcessorArray.push_back(new CoinDataProcessor);
@@ -96,7 +97,7 @@ void OnlineMonitor::BookUserHist()
   fRootFile->cd();
 
   // add user histograms
-  fhpla_pid = new TH2D("pla_pid","PLA ToF713-dE13",200,-23000,-20500,200,0,1200);
+  fhpla_pid = new TH2D("pla_pid","PLA ToF713-dE13",400,-23000,-19500,200,0,1200);
   fHistArray.push_back(fhpla_pid);
   
    
@@ -134,18 +135,62 @@ void OnlineMonitor::LoadBeamInterestedCut()
    //beamInterestedCut->SetPoint(8,-22867.2,698.534);
    //beamInterestedCut->SetPoint(9,-22885.2,685.505);
  
-   beamInterestedCut = new TCutG("beam4He",11);
-   beamInterestedCut->SetPoint(0,-22326.4,406.304);
-   beamInterestedCut->SetPoint(1,-22377.9,367.748);
-   beamInterestedCut->SetPoint(2,-22382.8,325.52);
-   beamInterestedCut->SetPoint(3,-22341.1,299.816);
-   beamInterestedCut->SetPoint(4,-22211.1,290.636);
-   beamInterestedCut->SetPoint(5,-22135.1,320.012);
-   beamInterestedCut->SetPoint(6,-22115.5,386.108);
-   beamInterestedCut->SetPoint(7,-22140,424.663);
-   beamInterestedCut->SetPoint(8,-22257.8,426.499);
-   beamInterestedCut->SetPoint(9,-22299.5,417.319);
-   beamInterestedCut->SetPoint(10,-22326.4,406.304);
+   //beamInterestedCut = new TCutG("beam4He",11);
+   //beamInterestedCut->SetPoint(0,-22326.4,406.304);
+   //beamInterestedCut->SetPoint(1,-22377.9,367.748);
+   //beamInterestedCut->SetPoint(2,-22382.8,325.52);
+   //beamInterestedCut->SetPoint(3,-22341.1,299.816);
+   //beamInterestedCut->SetPoint(4,-22211.1,290.636);
+   //beamInterestedCut->SetPoint(5,-22135.1,320.012);
+   //beamInterestedCut->SetPoint(6,-22115.5,386.108);
+   //beamInterestedCut->SetPoint(7,-22140,424.663);
+   //beamInterestedCut->SetPoint(8,-22257.8,426.499);
+   //beamInterestedCut->SetPoint(9,-22299.5,417.319);
+   //beamInterestedCut->SetPoint(10,-22326.4,406.304);
+
+   //beamInterestedCut = new TCutG("proton",9);
+   //beamInterestedCut->SetPoint(0,-22676.4,283.225);
+   //beamInterestedCut->SetPoint(1,-22441.5,307.655);
+   //beamInterestedCut->SetPoint(2,-22333.9,309.283);
+   //beamInterestedCut->SetPoint(3,-22337.2,258.795);
+   //beamInterestedCut->SetPoint(4,-22526.4,247.394);
+   //beamInterestedCut->SetPoint(5,-22678,239.251);
+   //beamInterestedCut->SetPoint(6,-22671.5,268.567);
+   //beamInterestedCut->SetPoint(7,-22671.5,268.567);
+   //beamInterestedCut->SetPoint(8,-22676.4,283.225);
+
+  //Last working version
+  //beamInterestedCut = new TCutG("beam11Li",5);
+  //beamInterestedCut->SetPoint(0,-22237.7,519.381);
+  //beamInterestedCut->SetPoint(1,-21984.9,519.381);
+  //beamInterestedCut->SetPoint(2,-21934.3,428.176);
+  //beamInterestedCut->SetPoint(3,-22014.2,250.651);
+  //beamInterestedCut->SetPoint(4,-22218.1,227.85);
+  //beamInterestedCut->SetPoint(5,-22254,317.427);
+  //beamInterestedCut->SetPoint(6,-22263.8,452.606);
+  //beamInterestedCut->SetPoint(7,-22237.7,519.381);
+
+  beamInterestedCut = new TCutG("beam11Li",11);
+  beamInterestedCut->SetPoint(0,-22220.8,814.286);
+  beamInterestedCut->SetPoint(1,-22234,629.221);
+  beamInterestedCut->SetPoint(2,-22249.8,451.948);
+  beamInterestedCut->SetPoint(3,-22249.8,274.675);
+  beamInterestedCut->SetPoint(4,-22162.6,146.104);
+  beamInterestedCut->SetPoint(5,-22043.5,136.364);
+  beamInterestedCut->SetPoint(6,-21940.4,333.117);
+  beamInterestedCut->SetPoint(7,-21937.7,631.169);
+  beamInterestedCut->SetPoint(8,-21993.3,868.831);
+  beamInterestedCut->SetPoint(9,-22141.4,872.727);
+  beamInterestedCut->SetPoint(10,-22220.8,814.286);
+
+
+   // Run 617
+   //beamInterestedCut = new TCutG("beam11Li",5);
+   //beamInterestedCut->SetPoint(0,-22316.8,543.133);
+   //beamInterestedCut->SetPoint(1,-22306.7,414.378);
+   //beamInterestedCut->SetPoint(2,-21856,425.107);
+   //beamInterestedCut->SetPoint(3,-21889.6,547.425);
+   //beamInterestedCut->SetPoint(4,-22316.8,543.133);
 
    beamInterestedCut->SetLineColor(2);
    beamInterestedCut->SetLineWidth(2);
@@ -157,6 +202,12 @@ void OnlineMonitor::FillUserHist()
 {
   TArtStoreManager *sman = TArtStoreManager::Instance();
   //TClonesArray *a = sman->FindDataContainer("NEBULAPla");
+
+  bool isDSBOK = false;
+  for(int i=0;i<8;i++){
+	  CoinDataProcessor *test = (CoinDataProcessor*)fProcessorArray[0];
+	  if(test->GetCoinBit(i)&&i==1){isDSBOK = true;}
+  }    
 
   //--------------------------------------
   // Beam PID
@@ -176,7 +227,7 @@ void OnlineMonitor::FillUserHist()
     }
   }
 
-  if (F7Pla !=0 && F13Pla_1 !=0){
+  if (isDSBOK&&F7Pla !=0 && F13Pla_1 !=0){
     double F7T = 0.5*(F7Pla->GetTLRaw()+F7Pla->GetTRRaw());
     double F13T1 = 0.5*(F13Pla_1->GetTLRaw()+F13Pla_1->GetTRRaw());
     double F7Q = sqrt(F7Pla->GetQLRaw()*F7Pla->GetQRRaw());
@@ -326,15 +377,10 @@ void OnlineMonitor::FillUserHist()
     }      
   }
 
-  bool isDSBOK = false;
-  for(int i=0;i<8;i++){
-	  CoinDataProcessor *test = (CoinDataProcessor*)fProcessorArray[0];
-	  if(test->GetCoinBit(i)&&i==1){isDSBOK = true;}
-  }    
 
-  if(isDSBOK&&isBDC1OK&&isBDC2OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40) fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
-  if(isDSBOK&&isBDC1OK&&isFDC1OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc2->Fill(fBDC2_X,fBDC2_Y);
-  if(isDSBOK&&isBDC2OK&&isFDC1OK&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc1->Fill(fBDC1_X,fBDC1_Y);
+  if(isDSBOK&&isBDC1OK&&isBDC2OK&&abs(fBDC1_X)<20&&abs(fBDC1_Y)<20&&abs(fBDC2_X)<20&&abs(fBDC2_Y)<20) fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
+  if(isDSBOK&&isBDC1OK&&isFDC1OK&&abs(fBDC1_X)<20&&abs(fBDC1_Y)<20&&abs(fFDC1_X)<20&&abs(fFDC1_Y)<20) fheff_bdc2->Fill(fBDC2_X,fBDC2_Y);
+  if(isDSBOK&&isBDC2OK&&isFDC1OK&&abs(fBDC2_X)<20&&abs(fBDC2_Y)<20&&abs(fFDC1_X)<20&&abs(fFDC1_Y)<20) fheff_bdc1->Fill(fBDC1_X,fBDC1_Y);
 
   double eff_bdc1 = 0.;
   double eff_bdc2 = 0.;

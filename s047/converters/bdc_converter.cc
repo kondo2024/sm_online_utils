@@ -28,7 +28,7 @@ int main(int argc, char **argv){
 
   converter.SetOutputTreeName("t_BDC");
 
-  const char *TDCdist = "rootfiles/dctdc/run0309_tdcSpectrum.root";
+  const char *TDCdist = "rootfiles/dctdc/run0628_tdcSpectrum.root";// s047 11Li run
 
   BDCDataProcessor bdc(TDCdist);
   bdc.MakeTreeBranches(true);
