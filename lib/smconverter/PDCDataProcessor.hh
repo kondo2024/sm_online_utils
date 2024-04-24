@@ -55,6 +55,7 @@ protected:
 
   // histograms
   TH1* fhidt_pdc;
+  TH1* fhidtot_pdc;
   TH1* fhxy_pdc;
 
   //Variables
