@@ -1,6 +1,7 @@
 #include "SAMURAIDataConverter.hh"
 #include "SAMURAITSDataProcessor.hh"
 #include <iostream>
+#include<unistd.h>
 
 using namespace std;
 
@@ -16,6 +17,7 @@ int main(int argc, char **argv){
   Int_t nRun = atoi(argv[1]);
 
   TString fname_ridf(Form("ridf/sdaq04/data%04d.ridf.gz",nRun));
+  if(access(fname_ridf.Data(),F_OK)!=0) fname_ridf.ReplaceAll(".ridf.gz",".ridf");
   TString fname_out(Form("rootfiles/ts/smts%04d.root",nRun));
 
   SAMURAIDataConverter converter;
