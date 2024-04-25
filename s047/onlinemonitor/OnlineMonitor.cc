@@ -79,7 +79,7 @@ void OnlineMonitor::Init()
 
   fnx=4;
   fny=4;
-  fResetCount=20000;
+  fResetCount=200000;
   fDrawTimeInterval=10;// sec
 
   festore = new TArtEventStore();
@@ -170,18 +170,26 @@ void OnlineMonitor::LoadBeamInterestedCut()
   //beamInterestedCut->SetPoint(6,-22263.8,452.606);
   //beamInterestedCut->SetPoint(7,-22237.7,519.381);
 
-  beamInterestedCut = new TCutG("beam11Li",11);
-  beamInterestedCut->SetPoint(0,-22220.8,814.286);
-  beamInterestedCut->SetPoint(1,-22234,629.221);
-  beamInterestedCut->SetPoint(2,-22249.8,451.948);
-  beamInterestedCut->SetPoint(3,-22249.8,274.675);
-  beamInterestedCut->SetPoint(4,-22162.6,146.104);
-  beamInterestedCut->SetPoint(5,-22043.5,136.364);
-  beamInterestedCut->SetPoint(6,-21940.4,333.117);
-  beamInterestedCut->SetPoint(7,-21937.7,631.169);
-  beamInterestedCut->SetPoint(8,-21993.3,868.831);
-  beamInterestedCut->SetPoint(9,-22141.4,872.727);
-  beamInterestedCut->SetPoint(10,-22220.8,814.286);
+  // beamInterestedCut = new TCutG("beam11Li",11);
+  // beamInterestedCut->SetPoint(0,-22220.8,814.286);
+  // beamInterestedCut->SetPoint(1,-22234,629.221);
+  // beamInterestedCut->SetPoint(2,-22249.8,451.948);
+  // beamInterestedCut->SetPoint(3,-22249.8,274.675);
+  // beamInterestedCut->SetPoint(4,-22162.6,146.104);
+  // beamInterestedCut->SetPoint(5,-22043.5,136.364);
+  // beamInterestedCut->SetPoint(6,-21940.4,333.117);
+  // beamInterestedCut->SetPoint(7,-21937.7,631.169);
+  // beamInterestedCut->SetPoint(8,-21993.3,868.831);
+  //beamInterestedCut->SetPoint(9,-22141.4,872.727);
+  //beamInterestedCut->SetPoint(10,-22220.8,814.286);
+
+  
+   beamInterestedCut = new TCutG("beam9Li",5);
+   beamInterestedCut->SetPoint(0,-22203,753.497);
+   beamInterestedCut->SetPoint(1,-22210.5,92.8756);
+   beamInterestedCut->SetPoint(2,-22007.9,98.7047);
+   beamInterestedCut->SetPoint(3,-22019.2,757.383);
+   beamInterestedCut->SetPoint(4,-22203,753.497);
 
 
    // Run 617
@@ -416,7 +424,7 @@ OnlineMonitor::OnlineMonitor(TString RidfFile)
   : festore(0),
     fInitialize(false), fIsHistBooked(false),
     fRunName(RidfFile),
-    fResetCount(20000), fDrawTimeInterval(10),
+    fResetCount(200000), fDrawTimeInterval(10),
     fDoesReset(true),
     f_iplot(0)
 {
