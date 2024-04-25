@@ -25,7 +25,6 @@ void FDC2DataProcessor::PrepareTreeBranches(TTree *tree)
 {
   if (!fCalibReady) PrepareCalib();
 
-  TClonesArray *fdc2hit_array = fCalibFDC2Hit->GetDCHitArray();
   TClonesArray *fdc2track_array = fCalibFDC2Track->GetDCTrackArray();
   fTree = tree;
   fTree->Branch(fBranchName.Data(), &fdc2track_array);

@@ -10,7 +10,7 @@ LDFLAGS += $(shell root-config --glibs) -L$(TARTSYS)/lib -lanacore -lanabrips -l
 
 all: lib
 
-lib: $(OBJS) 
+lib: $(OBJS)
 	$(CXX) -shared $(LDFLAGS) -o $(TARGET1) $^
 	ar rs $(TARGET2) $^
 

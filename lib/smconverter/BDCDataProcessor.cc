@@ -18,6 +18,7 @@ void BDCDataProcessor::PrepareCalib()
   fCalibBDC2Hit = new TArtCalibBDC2Hit;
   fCalibBDC1Track = new TArtCalibBDC1Track;
   fCalibBDC2Track = new TArtCalibBDC2Track;
+  fTargetTrack = new TArtDCTrack;
 
   LoadDCTDCDistribution();
 
@@ -28,13 +29,12 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
 {
   if (!fCalibReady) PrepareCalib();
 
-  TClonesArray *bdc1hit_array = fCalibBDC1Hit->GetDCHitArray();
-  TClonesArray *bdc2hit_array = fCalibBDC2Hit->GetDCHitArray();
   TClonesArray *bdc1track_array = fCalibBDC1Track->GetDCTrackArray();
   TClonesArray *bdc2track_array = fCalibBDC2Track->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &bdc1track_array);
-  fTree->Branch(fBranchName.Data(), &bdc2track_array);
+  fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
+  fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
+  fTree->Branch("Target", &fTargetTrack);
 }
 //____________________________________________________________________
 void BDCDataProcessor::PrepareHistograms()
@@ -45,12 +45,21 @@ void BDCDataProcessor::PrepareHistograms()
   fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,3000);
   fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-50,50, 100,-50,50);
   fhxy_bdc2 = new TH2D("bdc2_xy","BDC2 XY",100,-50,50, 100,-50,50);
+  fhxy_tgt = new TH2D("tgt_xy","Target XY",100,-50,50, 100,-50,50);
+  fhxa_tgt = new TH2D("tgt_xa","Target XA",100,-50,50, 100,-50,50);
+  fhyb_tgt = new TH2D("tgt_yb","Target YB",100,-50,50, 100,-50,50);
+  fhx_tgt = new TH1D("tgt_x","Target X",100,-50,50);
+  fhy_tgt = new TH1D("tgt_y","Target Y",100,-50,50);
 
   fHistArray.push_back(fhidt_bdc1);
   fHistArray.push_back(fhidt_bdc2);
   fHistArray.push_back(fhxy_bdc1);
   fHistArray.push_back(fhxy_bdc2);
-
+  fHistArray.push_back(fhxy_tgt);
+  fHistArray.push_back(fhxa_tgt);
+  fHistArray.push_back(fhyb_tgt);
+  fHistArray.push_back(fhx_tgt);
+  fHistArray.push_back(fhy_tgt);
 }
 //____________________________________________________________________
 void BDCDataProcessor::ClearData()
@@ -59,6 +68,12 @@ void BDCDataProcessor::ClearData()
   fCalibBDC2Hit->ClearData();
   fCalibBDC1Track->ClearData();
   fCalibBDC2Track->ClearData();
+
+  fTargetTrack->SetPosition(0,-9999);
+  fTargetTrack->SetPosition(1,-9999);
+  fTargetTrack->SetAngle(0,-9999);
+  fTargetTrack->SetAngle(1,-9999);
+
   fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
   fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
 }
@@ -93,23 +108,6 @@ void BDCDataProcessor::FillHistograms()
     Double_t traw = hit->GetTDC();
     fhidt_bdc2->Fill(id,traw);
   }
-
-  // temp, under construction
-
-  // BDC1 Track
-/*
-  TClonesArray *track_array = fCalibBDC1Track->GetDCTrackArray();
-  n=track_array->GetEntries();
-  for (int i=0;i<n;++i){
-    TArtDCTrack *tr = (TArtDCTrack*)track_array->At(i);
-
-//    Double_t x = ;
-//    Double_t y = ;
-//      fhxy_bdc1->Fill(x,y);
-  }
-*/
-  // BDC2 Track
-
 
   // BDC1 Track
   TClonesArray *BDC1Tracks = fCalibBDC1Track->GetDCTrackArray();
@@ -148,7 +146,7 @@ void BDCDataProcessor::FillHistograms()
       }
 
     //std::cout<<fBDC1_X<<" "<<fBDC1_Y<<std::endl;
-    fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
+      fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
     }  
   }
 
@@ -189,8 +187,33 @@ void BDCDataProcessor::FillHistograms()
       }
 
       fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
+
     }      
   }
+
+  if(abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
+    //Target Position
+    TVector3 bdc1Position(fBDC1_X,fBDC1_Y,fBDC1_Z);
+    TVector3 bdc2Position(fBDC2_X,fBDC2_Y,fBDC2_Z);
+    TVector3 beamDirection=bdc2Position-bdc1Position;
+    beamDirection=beamDirection.Unit();
+
+    TVector3 targetPosition 
+      = bdc1Position +  (fTarget_Z-bdc1Position.Z())/beamDirection.Z()*beamDirection;
+	  
+    fTargetTrack->SetPosition(targetPosition.X(),0);
+    fTargetTrack->SetPosition(targetPosition.Y(),1);
+    fTargetTrack->SetAngle(TMath::ATan(beamDirection.X()/beamDirection.Z())*1000.,0);// mrad
+    fTargetTrack->SetAngle(TMath::ATan(beamDirection.Y()/beamDirection.Z())*1000.,1);
+
+    fhxy_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetPosition(1));
+    fhx_tgt->Fill(fTargetTrack->GetPosition(0));
+    fhy_tgt->Fill(fTargetTrack->GetPosition(1));
+
+    fhxa_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetAngle(0));
+    fhyb_tgt->Fill(fTargetTrack->GetPosition(1),fTargetTrack->GetAngle(1));
+  }
+
 }
 //____________________________________________________________________
 
