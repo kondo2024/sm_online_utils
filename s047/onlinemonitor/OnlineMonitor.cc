@@ -183,14 +183,21 @@ void OnlineMonitor::LoadBeamInterestedCut()
   //beamInterestedCut->SetPoint(9,-22141.4,872.727);
   //beamInterestedCut->SetPoint(10,-22220.8,814.286);
 
-  
-   beamInterestedCut = new TCutG("beam9Li",5);
-   beamInterestedCut->SetPoint(0,-22203,753.497);
-   beamInterestedCut->SetPoint(1,-22210.5,92.8756);
-   beamInterestedCut->SetPoint(2,-22007.9,98.7047);
-   beamInterestedCut->SetPoint(3,-22019.2,757.383);
-   beamInterestedCut->SetPoint(4,-22203,753.497);
+  // // Unitl Run767 
+  //  beamInterestedCut = new TCutG("beam9Li",5);
+  //  beamInterestedCut->SetPoint(0,-22203,753.497);
+  //  beamInterestedCut->SetPoint(1,-22210.5,92.8756);
+  //  beamInterestedCut->SetPoint(2,-22007.9,98.7047);
+  //  beamInterestedCut->SetPoint(3,-22019.2,757.383);
+  //  beamInterestedCut->SetPoint(4,-22203,753.497);
 
+   // From Run 768
+   beamInterestedCut = new TCutG("beam6He",5);
+   beamInterestedCut->SetPoint(0,-22325.,245.);
+   beamInterestedCut->SetPoint(1,-22210.,245.);
+   beamInterestedCut->SetPoint(2,-22210.,292.);
+   beamInterestedCut->SetPoint(3,-22325.,292.);
+   beamInterestedCut->SetPoint(4,-22325.,245.);
 
    // Run 617
    //beamInterestedCut = new TCutG("beam11Li",5);
