@@ -30,7 +30,7 @@ Required
 - NPTOOL
 
 ## Converter
-This converts the RIDF data to root tree.
+This converts the RIDF data to root tree and/or historgrams.
 
 ## Filter
 This extracts and saves detector data which coincide with the SAMURAI
