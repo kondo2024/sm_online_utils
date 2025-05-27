@@ -74,10 +74,10 @@ Online data monitor for checking rawdata during beam time.
 
 ### usage
 1. ROOT[0] .L sm_online_utils/install/lib/libsmconverter.so
-2. ROOT[0] .L sm_online_utils/s057/onlinemonitor/OnlineMonitor.cc+g
-3. ROOT[1] OnlineMonitor *mon = new OnlineMonitor() 
+2. ROOT[1] .L sm_online_utils/s057/onlinemonitor/OnlineMonitor.cc+g
+3. ROOT[2] OnlineMonitor *mon = new OnlineMonitor() 
    // for online data, input ridf file name for offline analysis 
-4. ROOT[2] mon->Run()
+4. ROOT[3] mon->Run()
 
 click the canvas and press any key, then analysis is paused and
 several keyboard commands will be available. Ctrl+c stops 
