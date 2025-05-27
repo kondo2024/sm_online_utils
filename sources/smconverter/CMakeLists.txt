@@ -1,5 +1,16 @@
 file(GLOB SRC_FILES "*.cc")
 file(GLOB INC_FILES "*.hh")
+message(STATUS ${use_fsdbsd})
+
+##### add this line if you add detector with a name starting from T
+if (NOT ${use_fsdbsd})
+  message(STATUS ${INC_FILES})
+  list(FILTER INC_FILES EXCLUDE REGEX ".*FSDBSD.*hh$")
+  list(FILTER SRC_FILES EXCLUDE REGEX ".*FSDBSD.*cc$")
+  message(STATUS ${INC_FILES})
+endif()
+#list(FILTER TSRC_FILES EXCLUDE REGEX "PFAD*.cc$")
+
 
 add_library(smconverter SHARED ${SRC_FILES})
 

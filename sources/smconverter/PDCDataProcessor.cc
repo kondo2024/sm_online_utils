@@ -22,10 +22,10 @@ void PDCDataProcessor::PrepareCalib()
 void PDCDataProcessor::PrepareTreeBranches(TTree *tree)
 {
   if (!fCalibReady) PrepareCalib();
-
-  TClonesArray *pdctrack_array = fCalibPDCTrack->GetDCTrackArray();
-  fTree = tree;
-  fTree->Branch(fBranchName.Data(), &pdctrack_array);
+//
+//  TClonesArray *pdctrack_array = fCalibPDCTrack->GetDCTrackArray();
+//  fTree = tree;
+//  fTree->Branch(fBranchName.Data(), &pdctrack_array);
 }
 //____________________________________________________________________
 void PDCDataProcessor::PrepareHistograms()
@@ -70,16 +70,16 @@ void PDCDataProcessor::FillHistograms()
   }
 
 
-  // PDC Track
-  TClonesArray *PDCTracks = fCalibPDCTrack->GetDCTrackArray();
-  TArtDCTrack *track = (TArtDCTrack*)PDCTracks->At(0);
-  if (track!=0){
-    Double_t x = track->GetPosition(0);
-    Double_t y = track->GetPosition(1);
-//    Double_t a = TMath::ATan(track->GetAngle(0))*1000.;// mrad
-//    Double_t b = TMath::ATan(track->GetAngle(1))*1000.;
-    fhxy_pdc->Fill(x,y);
-  }
+//  // PDC Track
+//  TClonesArray *PDCTracks = fCalibPDCTrack->GetDCTrackArray();
+//  TArtDCTrack *track = (TArtDCTrack*)PDCTracks->At(0);
+//  if (track!=0){
+//    Double_t x = track->GetPosition(0);
+//    Double_t y = track->GetPosition(1);
+////    Double_t a = TMath::ATan(track->GetAngle(0))*1000.;// mrad
+////    Double_t b = TMath::ATan(track->GetAngle(1))*1000.;
+//    fhxy_pdc->Fill(x,y);
+//  }
 
 }
 //____________________________________________________________________

@@ -1,6 +1,11 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(sm_online_utils)
 
+### default install options ----------------------
+
+option(use_pfad "use PFAD" OFF)
+option(use_fsdbsd "use FSD/BSD" OFF)
+
 ### for ROOT ----------------------
 if(DEFINED ENV{ROOTSYS})
   message(STATUS "Found ROOT, ROOTSYS = " $ENV{ROOTSYS})
