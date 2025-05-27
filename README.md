@@ -33,6 +33,7 @@ Required
 
 # Installation
 ```
+git clone https://github.com/kondo2024/sm_online_utils
 cd sm_online_utils
 mkdir build
 mkdir install
