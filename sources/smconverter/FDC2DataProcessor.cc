@@ -132,7 +132,7 @@ void FDC2DataProcessor::LoadDCTDCDistribution() {
 	Hist1D = NULL;
       }
       else
-      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hfdc2tdc%d",i) << "\e  [0m" << std::endl;
+      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hfdc2tdc%d",i) << "\e[0m" << std::endl;
     }
   }
 

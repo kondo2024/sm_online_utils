@@ -237,7 +237,7 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
 	Hist1D = NULL;
       }
       else
-      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc1tdc%d",i) << "\e  [0m" << std::endl;
+      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc1tdc%d",i) << "\e[0m" << std::endl;
     }
 
     for(Int_t i=0; i<BDCNumberOfLayers; i++) {
@@ -249,7 +249,7 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
 	Hist1D = NULL;
       }
       else
-      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc2tdc%d",i) << "\e  [0m" << std::endl;
+      std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc2tdc%d",i) << "\e[0m" << std::endl;
     }
   }
 
