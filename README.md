@@ -32,12 +32,14 @@ Required
 - NPTOOL
 
 # Installation
+```
 cd sm_online_utils
 mkdir build
 mkdir install
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../sources
 make -j10 install
+```
 
 # Descriptions
 ## Converter
