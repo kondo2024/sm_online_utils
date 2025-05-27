@@ -26,9 +26,20 @@ sm_online_utils
 
 Required
 
+- ROOT v6
+- cmake
 - ANAROOT
 - NPTOOL
 
+# Installation
+cd sm_online_utils
+mkdir build
+mkdir install
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ../sources
+make -j10 install
+
+# Descriptions
 ## Converter
 This converts the RIDF data to root tree and/or historgrams.
 
@@ -55,14 +66,12 @@ is going on in the procedure shown on Canvas.
 ### sXXX/macros/chkmerge.cc
 sample root macro to make plots from merged tree data.
 
-
 ## OnlineMonitor
 Online data monitor for checking rawdata during beam time.
 
 ### usage
-1. Add include path of lib/smconverterlib and load
-   lib/smconverter/libsmconverter.so in rootlogon.C.
-2. ROOT[0] .L OnlineMonitor.cc+g
+1. ROOT[0] .L sm_online_utils/install/lib/libsmconverter.so
+2. ROOT[0] .L sm_online_utils/s057/onlinemonitor/OnlineMonitor.cc+g
 3. ROOT[1] OnlineMonitor *mon = new OnlineMonitor() 
    // for online data, input ridf file name for offline analysis 
 4. ROOT[2] mon->Run()
