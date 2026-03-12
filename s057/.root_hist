@@ -1,0 +1,11 @@
+.x online.C
+cd ..
+ls
+.q
+.x online.C
+.q
+.x online.C
+.
+.q
+.x online.C
+.q

@@ -1,0 +1,1467 @@
+// usage
+// root [0] .L macros/onlinemonitor/OnlineConverter.cc+g
+// root [1] OnlineConverter* mon = new OnlineConverter()
+// root [2] mon->Run()
+//
+#include "OnlineConverter.hh"
+
+#include <iostream>
+#include <csignal>
+
+#include "TSystem.h"
+#include "TPad.h"
+#include "TCanvas.h"
+#include "TDatime.h"
+#include "TText.h"
+#include "TClonesArray.h"
+
+#include "TArtStoreManager.hh"
+/*
+  How to use
+  ROOT[] .L sm_online_utils/install/lib/libsmconverter.so
+  ROOT[] .L sm_online_utils/s057/onlinemonitor/OnlineConverter.cc+g
+  ROOT[] OnlineConverter *mon = new OnlineConverter()
+  ROOT[] mon->Run()
+ */
+
+
+#include "TArtRawEventObject.hh"
+#include "TArtRawSegmentObject.hh"
+#include "TArtEventInfo.hh"
+
+#include "TArtPPAC.hh"
+#include "TArtFocalPlane.hh"
+
+#include "CoinDataProcessor.hh"
+#include "PlasticDataProcessor.hh"
+#include "PPACDataProcessor.hh"
+#include "FocalPlaneDataProcessor.hh"
+#include "BDCDataProcessor.hh"
+#include "FDC0DataProcessor.hh"
+#include "FDC1DataProcessor.hh"
+#include "FDC2DataProcessor.hh"
+#include "NEBULADataProcessor.hh"
+#include "HODPlaDataProcessor.hh"
+#include "PDCDataProcessor.hh"
+
+const Double_t kfpl37 = 46566+205*2; // mm; flight path length from F3Pla to F7Pla
+const Double_t kc = 299.792458; // mm/ns; light velocity
+const Double_t kme = 511e3; // eV/c2; electron mass
+const Double_t kI = 64.7; // eV; mean excitation energy of plastic scintillator
+const Double_t kmamu = 0.93149410372; // GeV; atomic mass unit
+const Double_t kBrho0 = 6.6096; // Tm; rigidity at F5
+const Double_t kxd = 33.; // mm/%; (x|delta)
+const Double_t kBrhoop = 3.3356; // Tm/(GeV/c)
+
+const Double_t kch2ns = 0.0244140625; // ns; V1290
+
+//const Double_t kToF37offset_BR = 309; // ns; rough evaluation w/ LISE++ estimation
+const Double_t kToF37offset_BR = 309+1.4; // ns; phenomenological correction
+const Double_t kToF37offset_SM = kToF37offset_BR-1.54;
+
+const Double_t kBDC1_Z = -(4312.30+2293.19+34); // 2025.06.27 23:50
+const Double_t kBDC2_Z = -(4312.30+1293.49+34);
+const Double_t kTarget_Z = -(4312.30-57-25); // center of the target
+
+//_________________________________________________________________________________
+// function to exit loop at keyboard interrupt.
+bool stoploop = false;
+void stop_interrupt(int) {
+  printf("keyboard interrupt\n");
+  stoploop = true;
+}
+//_________________________________________________________________________________
+void dump_pla(TArtPlastic* pla)
+{
+  Int_t fTLRaw = pla->GetTLRaw();
+  Int_t fTRRaw = pla->GetTRRaw();
+  Int_t fQLRaw = pla->GetQLRaw();
+  Int_t fQRRaw = pla->GetQRRaw();
+  Int_t fQTCLRawStart = pla->GetQTCLRawStart();
+  Int_t fQTCRRawStart = pla->GetQTCRRawStart();
+  Int_t fQTCLRawWidth = pla->GetQTCLRawWidth();
+  Int_t fQTCRRawWidth = pla->GetQTCRRawWidth();
+  Int_t fNHitL = pla->GetNHitL();
+  Int_t fNHitR = pla->GetNHitR();
+  Int_t fMulHitTDCL0 = (fNHitL>0) ? pla->GetMulHitTDCL(0) : -9999;
+  Int_t fMulHitTDCR0 = (fNHitR>0) ? pla->GetMulHitTDCR(0) : -9999;
+  //printf("%10d %10d %10d %10d ", fTLRaw, fTRRaw, fQLRaw, fQRRaw);
+  //printf("%10d %10d %10d %10d ", fQTCLRawStart, fQTCRRawStart, fQTCLRawWidth, fQTCRRawWidth);
+  //printf("%10d %10d %10d %10d\n", fNHitL, fNHitR, fMulHitTDCL0, fMulHitTDCR0);
+}
+double f5x(double f5dt)
+{
+  return
+    -122.589
+    -1.15179 *pow(f5dt,1.)
+    -0.0331848 *pow(f5dt,2.)
+    -0.000661241 *pow(f5dt,3.)
+    -7.61878e-06 *pow(f5dt,4.)
+    -5.2709e-08 *pow(f5dt,5.)
+    -2.17764e-10 *pow(f5dt,6.)
+    -5.20103e-13 *pow(f5dt,7.)
+    -6.55889e-16 *pow(f5dt,8.)
+    -3.33996e-19 *pow(f5dt,9.);
+}
+double BetheF(double beta)
+{
+  return log(2*kme*beta*beta/((1-beta*beta)*kI)-beta*beta)/(beta*beta);
+}
+//_________________________________________________________________________________
+void OnlineConverter::Run(ULong64_t nmax)// main 
+{
+  if(nmax>0) fNeveMax = nmax ;
+  if (!fInitialize) {
+    Init();
+  }
+
+  if (!fIsHistBooked) {
+    BookHist();
+    BookUserHist();
+  }
+
+  EventLoop();
+  fRootFile->Write();
+}
+//_________________________________________________________________________________
+void OnlineConverter::Init()
+{
+  // Path for Input files
+  //const char *TDCdist = "db/dc/tdcdists_run1198.root";// 20250629, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1173.root";// 20250628, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1171.root";// 20250628, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1172.root";// 20250628, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1145.root";// 20250628, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1143.root";// 20250628, Ca beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1134.root";// 20250627, p beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1130.root";// 20250627, 3He beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1129.root";// 20250627, 3He beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1122.root";// 20250627, 3He beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1121.root";// 20250627, 3He beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1108.root";// 20250627, t beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1088.root";// 20250627, alpha beam, multihit, BDC2=900V
+  //const char *TDCdist = "db/dc/tdcdists_run1086.root";// 20250627, alpha beam, multihit, BDC2=900V
+  //const char *TDCdist = "db/dc/tdcdists_run1082.root";// 20250627, alpha beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1070.root";// 20250625, d beam, multihit
+  //const char *TDCdist = "db/dc/tdcdists_run1061.root";// 20250625, d beam
+  //const char *TDCdist = "db/dc/tdcdists_run1052.root";// 20250625, alpha beam
+  //const char *TDCdist = "db/dc/tdcdists_run1046.root";// 20250625, d beam
+  //const char *TDCdist = "db/dc/tdcdists_run1007.root";// 20250625, Ca beam
+  //const char *TDCdist = "db/dc/tdcdists_run0096.root";
+  //const char *TDCdist = "db/dc/tdcdists_run0043.root";
+  //const char *TDCdist = "db/dc/tdcdists_run0033.root";//
+
+  char *TDCdist;
+  if (1071<=fRunNumber && fRunNumber<1082) {
+    // d beam
+    std::cout << "STC for deuteron beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1070.root";// 20250625, d beam, multihit
+  } else if (1082<=fRunNumber && fRunNumber<1108) {
+    // a beam
+    std::cout << "STC for alpha beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1088.root";// 20250627, alpha beam, multihit, BDC2=900V
+  } else if (1108<=fRunNumber && fRunNumber<1121) {
+    // t beam
+    std::cout << "STC for triton beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1108.root";// 20250627, t beam, multihit
+  } else if (1121<=fRunNumber && fRunNumber<1134) {
+    // 3He beam
+    std::cout << "STC for 3He beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1130.root";// 20250627, 3He beam, multihit
+  } else if (1134<=fRunNumber && fRunNumber<1140) {
+    // p beam
+    std::cout << "STC for proton beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1134.root";// 20250627, p beam, multihit
+  } else {
+    // Ca beam
+    std::cout << "STC for Ca beam" << std::endl;
+    TDCdist = "db/dc/tdcdists_run1198.root";// 20250629, Ca beam, multihit
+  }
+
+  // change for your experiment
+  fProcessorArray.push_back(new CoinDataProcessor);
+
+  //fProcessorArray.push_back(new PlasticDataProcessor);
+  //PlasticDataProcessor *platic_processor = new PlasticDataProcessor("db/SAMURAIPlastic_20250529_v2.xml");
+  //PlasticDataProcessor *platic_processor = new PlasticDataProcessor("db/SAMURAIPlastic_20251003_kubota.xml");
+  PlasticDataProcessor *platic_processor = new PlasticDataProcessor("db/SAMURAIPlastic_20251009_kubota.xml"); // Multihit TDC/QTC gate for multihit rejection
+  //PlasticDataProcessor *platic_processor = new PlasticDataProcessor("db/SAMURAIPlastic_20251110_lightion_kubota.xml"); // disable qtc_underflow for light ion analysis
+  fProcessorArray.push_back(platic_processor);
+
+  fProcessorArray.push_back(new PPACDataProcessor);
+  fProcessorArray.push_back(new FocalPlaneDataProcessor);
+
+  BDCDataProcessor *bdc_processor = new BDCDataProcessor(TDCdist);
+//  bdc_processor->SetTDCWindow(1,4000,4700);// writtein BDCDataProcessor
+//  bdc_processor->SetTDCWindow(2,4000,4700);
+
+//  bdc_processor->SetBDC1Z(4170.0-6667.3555);// from gameplan 2025.05.29
+//  bdc_processor->SetBDC2Z(4170.0-5667.7865);
+//  bdc_processor->SetBDC1Z(2293.19+57.);// from measure values 2025.06.25
+//  bdc_processor->SetBDC2Z(1293.49+57.);// tgt pos is upstream face
+//  bdc_processor->SetTargetZ(0.0);
+
+  // bdc_processor->SetBDC1Z(-(4312.30+2293.19+34)); // 2025.06.27 23:50
+  // bdc_processor->SetBDC2Z(-(4312.30+1293.49+34));
+  // bdc_processor->SetTargetZ(-(4312.30-57-25)); // center of the target
+  bdc_processor->SetBDC1Z(kBDC1_Z);
+  bdc_processor->SetBDC2Z(kBDC2_Z);
+  bdc_processor->SetTargetZ(kTarget_Z);
+  fProcessorArray.push_back(bdc_processor);
+
+//  fProcessorArray.push_back(new FDC1DataProcessor(TDCdist));
+//  fProcessorArray.push_back(new FDC2DataProcessor(TDCdist));
+//
+//  fProcessorArray.push_back(new HODPlaDataProcessor);
+//  fProcessorArray.push_back(new NEBULADataProcessor);
+//
+//  PDCDataProcessor *pdc_processor = new PDCDataProcessor;
+//  pdc_processor->DoTracking(false);
+//  fProcessorArray.push_back(pdc_processor);
+  
+
+  fnx=4;
+  fny=4;
+  fResetCount=20000;
+  fDrawTimeInterval=10;// sec
+
+  festore = new TArtEventStore();
+  fNeve = 0;
+  fNeve_monitor = 0;
+
+  fInitialize = true;
+
+}
+//_________________________________________________________________________________
+void OnlineConverter::BookUserHist()
+{
+  fRootFile->cd();
+
+  tree = new TTree("tree", "tree");
+  tree->Branch("TRef", &fTRef);
+  tree->Branch("F3TLRaw", &fF3TLRaw);
+  tree->Branch("F3TRRaw", &fF3TRRaw);
+  tree->Branch("F3QLRaw", &fF3QLRaw);
+  tree->Branch("F3QRRaw", &fF3QRRaw);
+  tree->Branch("F3QTCLRawStart", &fF3QTCLRawStart);
+  tree->Branch("F3QTCRRawStart", &fF3QTCRRawStart);
+  tree->Branch("F3QTCLRawWidth", &fF3QTCLRawWidth);
+  tree->Branch("F3QTCRRawWidth", &fF3QTCRRawWidth);
+  tree->Branch("F3NHitL", &fF3NHitL);
+  tree->Branch("F3NHitR", &fF3NHitR);
+  tree->Branch("F3MulHitTDCL", fF3MulHitTDCL);
+  tree->Branch("F3MulHitTDCR", fF3MulHitTDCR);
+  tree->Branch("F5TLRaw", &fF5TLRaw);
+  tree->Branch("F5TRRaw", &fF5TRRaw);
+  tree->Branch("F5QLRaw", &fF5QLRaw);
+  tree->Branch("F5QRRaw", &fF5QRRaw);
+  tree->Branch("F5QTCLRawStart", &fF5QTCLRawStart);
+  tree->Branch("F5QTCRRawStart", &fF5QTCRRawStart);
+  tree->Branch("F5QTCLRawWidth", &fF5QTCLRawWidth);
+  tree->Branch("F5QTCRRawWidth", &fF5QTCRRawWidth);
+  tree->Branch("F5NHitL", &fF5NHitL);
+  tree->Branch("F5NHitR", &fF5NHitR);
+  tree->Branch("F5MulHitTDCL", fF5MulHitTDCL);
+  tree->Branch("F5MulHitTDCR", fF5MulHitTDCR);
+  tree->Branch("F7TLRaw", &fF7TLRaw);
+  tree->Branch("F7TRRaw", &fF7TRRaw);
+  tree->Branch("F7QLRaw", &fF7QLRaw);
+  tree->Branch("F7QRRaw", &fF7QRRaw);
+  tree->Branch("F7QTCLRawStart", &fF7QTCLRawStart);
+  tree->Branch("F7QTCRRawStart", &fF7QTCRRawStart);
+  tree->Branch("F7QTCLRawWidth", &fF7QTCLRawWidth);
+  tree->Branch("F7QTCRRawWidth", &fF7QTCRRawWidth);
+  tree->Branch("F7NHitL", &fF7NHitL);
+  tree->Branch("F7NHitR", &fF7NHitR);
+  tree->Branch("F7MulHitTDCL", fF7MulHitTDCL);
+  tree->Branch("F7MulHitTDCR", fF7MulHitTDCR);
+
+  tree->Branch("F13AQLRaw", &fF13AQLRaw);
+  tree->Branch("F13AQRRaw", &fF13AQRRaw);
+  tree->Branch("F13BQLRaw", &fF13BQLRaw);
+  tree->Branch("F13BQRRaw", &fF13BQRRaw);
+
+  tree->Branch("F3T_BR", &fF3T_BR);
+  tree->Branch("F3T_SM", &fF3T_SM);
+  tree->Branch("F5DT", &fF5DT);
+  tree->Branch("F5Xpla", &fF5Xpla);
+  tree->Branch("F7T_BR", &fF7T_BR);
+  tree->Branch("F7T_SM", &fF7T_SM);
+  tree->Branch("F7Q", &fF7Q);
+  tree->Branch("ToF37_BR", &fToF37_BR);
+  tree->Branch("ToF37_SM", &fToF37_SM);
+  tree->Branch("beta37", &fbeta37);
+  tree->Branch("gamma37", &fgamma37);
+  tree->Branch("BetheF", &fBetheF);
+  tree->Branch("Z_tmp", &fZ_tmp);
+  tree->Branch("Z", &fZ);
+  tree->Branch("delta", &fdelta);
+  tree->Branch("BrhoF5", &fBrhoF5);
+  tree->Branch("AoQ", &fAoQ);
+  tree->Branch("dE", &fdE);
+
+  tree->Branch("BDC1_X", &fBDC1_X); 
+  tree->Branch("BDC1_Y", &fBDC1_Y); 
+  tree->Branch("BDC1_ThetaX", &fBDC1_ThetaX); 
+  tree->Branch("BDC1_ThetaY", &fBDC1_ThetaY); 
+  tree->Branch("BDC2_X", &fBDC2_X); 
+  tree->Branch("BDC2_Y", &fBDC2_Y); 
+  tree->Branch("BDC2_ThetaX", &fBDC2_ThetaX); 
+  tree->Branch("BDC2_ThetaY", &fBDC2_ThetaY); 
+  tree->Branch("FDC1_X", &fFDC1_X); 
+  tree->Branch("FDC1_Y", &fFDC1_Y); 
+  tree->Branch("FDC1_ThetaX", &fFDC1_ThetaX); 
+  tree->Branch("FDC1_ThetaY", &fFDC1_ThetaY); 
+  tree->Branch("TGT_X", &fTGT_X);
+  tree->Branch("TGT_Y", &fTGT_Y);
+  tree->Branch("TGT_A", &fTGT_A);
+  tree->Branch("TGT_B", &fTGT_B);
+
+  tree->Branch("F3_X", &fF3_X);
+  tree->Branch("F3_Y", &fF3_Y);
+  tree->Branch("F3_A", &fF3_A);
+  tree->Branch("F3_B", &fF3_B);
+  tree->Branch("F5_X", &fF5_X);
+  tree->Branch("F5_Y", &fF5_Y);
+  tree->Branch("F5_A", &fF5_A);
+  tree->Branch("F5_B", &fF5_B);
+  tree->Branch("F7_X", &fF7_X);
+  tree->Branch("F7_Y", &fF7_Y);
+  tree->Branch("F7_A", &fF7_A);
+  tree->Branch("F7_B", &fF7_B);
+
+
+  /*
+  // add user histograms
+  hf3lr_1 = new TH1D("f3lr_1", "TLRaw F3 (SM)", 1000, 0, 100000);
+  hf3rr_1 = new TH1D("f3rr_1", "TRRaw F3 (SM)", 1000, 0, 100000);
+  hf5lr_1 = new TH1D("f5lr_1", "TLRaw F5 (SM)", 1000, 0, 100000);
+  hf5rr_1 = new TH1D("f5rr_1", "TRRaw F5 (SM)", 1000, 0, 100000);
+  hf7lr_1 = new TH1D("f7lr_1", "TLRaw F7 (SM)", 1000, 0, 100000);
+  hf7rr_1 = new TH1D("f7rr_1", "TRRaw F7 (SM)", 1000, 0, 100000);
+  hf13alr_1 = new TH1D("f13alr_1", "TLRaw F13A (SM)", 1000, 0, 100000);
+  hf13arr_1 = new TH1D("f13arr_1", "TRRaw F13A (SM)", 1000, 0, 100000);
+  hf13blr_1 = new TH1D("f13blr_1", "TLRaw F13B (SM)", 1000, 0, 100000);
+  hf13brr_1 = new TH1D("f13brr_1", "TRRaw F13B (SM)", 1000, 0, 100000);
+  hsbvlr_1 = new TH1D("sbvlr_1", "TLRaw SBV (SM)", 1000, 0, 100000);
+  hsbvrr_1 = new TH1D("sbvrr_1", "TRRaw SBV (SM)", 1000, 0, 100000);
+  hf3lr_2 = new TH1D("f3lr_2", "TLRaw F3 (BR)", 1000, 0, 100000);
+  hf3rr_2 = new TH1D("f3rr_2", "TRRaw F3 (BR)", 1000, 0, 100000);
+  hf5lr_2 = new TH1D("f5lr_2", "TLRaw F5 (BR)", 1000, 0, 100000);
+  hf5rr_2 = new TH1D("f5rr_2", "TRRaw F5 (BR)", 1000, 0, 100000);
+  hf7lr_2 = new TH1D("f7lr_2", "TLRaw F7 (BR)", 1000, 0, 100000);
+  hf7rr_2 = new TH1D("f7rr_2", "TRRaw F7 (BR)", 1000, 0, 100000);
+  fHistArray.push_back(hf3lr_1);
+  fHistArray.push_back(hf3rr_1);
+  fHistArray.push_back(hf5lr_1);
+  fHistArray.push_back(hf5rr_1);
+  fHistArray.push_back(hf7lr_1);
+  fHistArray.push_back(hf7rr_1);
+  fHistArray.push_back(hf3lr_2);
+  fHistArray.push_back(hf3rr_2);
+  fHistArray.push_back(hf5lr_2);
+  fHistArray.push_back(hf5rr_2);
+  fHistArray.push_back(hf7lr_2);
+  fHistArray.push_back(hf7rr_2);
+
+
+  
+  hf3t_1 = new TH1D("f3t_1", "Time F3(BR)", 1000, 1000, 2000);
+  hf3t_2 = new TH1D("f3t_2", "Time F3(SM)", 1000, 0, 1000);
+  hf7t_1 = new TH1D("f7t_1", "Time F7(BR)", 1000, 1000, 2000);
+  hf7t_2 = new TH1D("f7t_2", "Time F7(SM)", 1000, 0, 1000);
+  htof37_1 = new TH1D("tof37_1", "ToF F3(BR)-F7(BR)", 1000, -500, 500);
+  htof37_2 = new TH1D("tof37_2", "ToF F3(BR)-F7(SM)", 1000, 0, 1000);
+  htof37_3 = new TH1D("tof37_3", "ToF F3(SM)-F7(BR)", 1000, -1000, 0);
+  htof37_4 = new TH1D("tof37_4", "ToF F3(SM)-F7(SM)", 1000, -500, 500);
+  htof37br_tof37sm = new TH2D("tof37br_tof37sm", "ToF37 (BR) vs ToF37 (SM)", 200, -75, -50, 200, -75, -50);
+  htof37diff_tof37sm = new TH2D("tof37diff_tof37sm", "ToF37 diff (BR-SM) vs ToF37 (SM)", 200, -75, -50, 200, -10, 10);
+
+  fHistArray.push_back(hf3t_1);
+  fHistArray.push_back(hf3t_2);
+  fHistArray.push_back(hf7t_1);
+  fHistArray.push_back(hf7t_2);
+  fHistArray.push_back(htof37_1);
+  fHistArray.push_back(htof37_2);
+  fHistArray.push_back(htof37_3);
+  fHistArray.push_back(htof37_4);
+  fHistArray.push_back(htof37br_tof37sm);
+  fHistArray.push_back(htof37diff_tof37sm);
+
+
+  hf7qrl = new TH2D("f7qrl", "F7 QTC R vs L", 200,2000,10000, 200,2000,10000);
+  hf7qtd = new TH2D("f7qtd", "F7 Q vs tdiff", 100,-170,-70, 200,2000,10000);
+  hf7qrtd = new TH2D("f7qrtd", "F7 qratio vs tdiff", 100,-170,-70, 200,-1.5,1.5);
+  fHistArray.push_back(hf7qrl);
+  fHistArray.push_back(hf7qtd);
+  fHistArray.push_back(hf7qrtd);
+
+  // hzvsaoq = new TH2D("zvsaoq","Beam Z vs AoQ (ToF313_F5cal)",200,-28000,-26400,200,18,25);
+  // fHistArray.push_back(hzvsaoq);
+
+  
+  fhpla_pid = new TH2D("pla_pid","PLA ToF713-F7Q",200,-24000,-23000,200,0,2000);
+  fhpla_pid2 = new TH2D("pla_pid2","PLA ToF313_F5cal-F7Q QTC",200,-30000,-25000,200,0,12000);
+  fhpla_pid3 = new TH2D("pla_pid3","PLA ToF313_F5cal-F7Q QTC zoom",200,-28000,-26400,200,3000,7000);
+  fhpla_tof713dt5 = new TH2D("pla_tof713dt5","PLA ToF713-F5dT",200,-24000,-23000,200,-1000,0);
+  fhpla_tof313dt5 = new TH2D("pla_tof313dt5","PLA ToF313-F3dT",200,-30000,-25000,200,-1000,0);
+  fhpla_tof313dt5_cal = new TH2D("pla_tof313dt5_cal","PLA ToF313-F3dT_F5cal",200,-30000,-25000,200,-1000,0);
+  fHistArray.push_back(fhpla_pid);
+  fHistArray.push_back(fhpla_pid2);
+  fHistArray.push_back(fhpla_pid3);
+  fHistArray.push_back(fhpla_tof713dt5);
+  fHistArray.push_back(fhpla_tof313dt5);
+  fHistArray.push_back(fhpla_tof313dt5_cal);
+   
+  fheff_bdc1 = new TH2D("bdc1_eff","BDC1 when BDC2&FDC1 hit",100,-50,50, 100,-50,50);
+  fheff_bdc2 = new TH2D("bdc2_eff","BDC2 when BDC1&FDC1 hit",100,-50,50, 100,-50,50);
+  fheff_fdc1 = new TH2D("fdc1_eff","FDC1 when BDC1&BDC2 hit",100,-150,150, 100,-150,150);
+  fheff      = new TH1D("heff","Efficiency for BDC1 BDC2 FDC1",6,0.5,3.5);
+  //fHistArray.push_back(fheff_bdc1);
+  //fHistArray.push_back(fheff_bdc2);
+  //fHistArray.push_back(fheff_fdc1);
+  fHistArray.push_back(fheff);
+
+  hf5dt_f5x = new TH2D("f5dt_f5x","F5 Pla tdiff (Mult0) vs F5X PPAC",100,-150,150, 100,-400,100);
+  hf5dt2_f5x = new TH2D("f5dt2_f5x","F5 Pla tdiff (TDC) vs F5X PPAC",100,-150,150, 100,-600,0);
+  hf5dt_f51ax = new TH2D("f5dt_f51ax","F5 Pla tdiff (Mult0) vs F5 X PPAC 1A",100,-150,150, 100,-400,100);
+  hf5dt_f51bx = new TH2D("f5dt_f51bx","F5 Pla tdiff (Mult0) vs F5 X PPAC 1B",100,-150,150, 100,-400,100);
+  hf5dt_f52ax = new TH2D("f5dt_f52ax","F5 Pla tdiff (Mult0) vs F5 X PPAC 2A",100,-150,150, 100,-400,100);
+  hf5dt_f52bx = new TH2D("f5dt_f52bx","F5 Pla tdiff (Mult0) vs F5 X PPAC 1B",100,-150,150, 100,-400,100);
+  hf51bxf5dt = new TH2D("f51bxf5dt", "F5X PPAC1B F5 tdiff", 500,-500,0, 500,-150,100);
+  hf51bxf5dtx = new TH2D("f51bxf5dtx", "F5X PPAC1B F5 tdiff X", 500,-150,100, 500,-150,100);
+
+  fHistArray.push_back(hf5dt_f5x);
+  fHistArray.push_back(hf5dt2_f5x);
+  fHistArray.push_back(hf5dt_f51ax);
+  fHistArray.push_back(hf5dt_f51bx);
+  fHistArray.push_back(hf5dt_f52ax);
+  fHistArray.push_back(hf5dt_f52bx);
+  fHistArray.push_back(hf51bxf5dt);
+  fHistArray.push_back(hf51bxf5dtx);
+
+  htof37f5dtx = new TH2D("tof37f5dtx", "ToF37 (BR) vs F5 tdiff X", 200,-150,100, 200,235,260);
+  htof37f5dtx2 = new TH2D("tof37f5dtx2", "ToF37 (BR) vs F5 tdiff X (F5X g)", 200,-150,100, 200,235,260);
+  // hzvstof37 = new TH2D("zvstof37", "Z vs ToF37 (BR)", 200,235,260, 200,18,25);
+  // hzvstof372 = new TH2D("zvstof372", "Z vs ToF37 (BR) (F5X g)", 200,235,260, 200,18,25);
+  hzvstof37 = new TH2D("zvstof37", "Z vs ToF37 (BR)", 200,235,260, 200,10,20);
+  hzvstof372 = new TH2D("zvstof372", "Z vs ToF37 (BR) (F5X g)", 200,235,260, 200,10,20);
+  hbeta37tof37 = new TH2D("beta37tof37", "beta37 vs ToF37 (BR)", 200,235,260, 200,0.6,0.7);
+  hbeta37tof372 = new TH2D("beta37tof372", "beta37 vs ToF37 (BR) (F5X g)", 200,235,260, 200,0.6,0.7);
+  hBetheFbeta37 = new TH2D("BetheFbeta37", "BetheF vs beta37", 200,0.6,0.7, 200, 0, 100);
+  hBetheFbeta372 = new TH2D("BetheFbeta372", "BetheF vs beta37 (F5X g)", 200,0.6,0.7, 200, 0, 100);
+  hBrhoF5beta37 = new TH2D("BrhoF5beta37", "BrhoF5 vs beta37", 200,0.6,0.7, 200,6.,7.);
+  hAoQBrhoF5 = new TH2D("AoQBrhoF5", "AoQ vs BrhoF5", 200,6.,7., 200.,2.4,2.7);
+  //hzvsaoq = new TH2D("zvsaoq","Beam Z vs AoQ",200,2.4,2.7,200,18,25);
+  hzvsaoq = new TH2D("zvsaoq","Beam Z vs AoQ",200,2.4,2.7,200,10,20);
+  hdEBetheF = new TH2D("dEBetheF", "dE vs BetheF", 200,20.,30., 200,8000.,14000.);
+
+  fHistArray.push_back(htof37f5dtx);
+  fHistArray.push_back(htof37f5dtx2);
+  fHistArray.push_back(hzvstof37);
+  fHistArray.push_back(hzvstof372);
+  fHistArray.push_back(hbeta37tof37);
+  fHistArray.push_back(hbeta37tof372);
+  fHistArray.push_back(hBetheFbeta37);
+  fHistArray.push_back(hBetheFbeta372);
+  fHistArray.push_back(hBrhoF5beta37);
+  fHistArray.push_back(hAoQBrhoF5);
+  fHistArray.push_back(hzvsaoq);
+  fHistArray.push_back(hdEBetheF);
+  */
+
+  fIsHistBooked = true;
+}
+//______________________________________________________________________________
+void OnlineConverter::FillUserHist()
+{
+  TArtStoreManager *sman = TArtStoreManager::Instance();
+  //TClonesArray *a = sman->FindDataContainer("NEBULAPla");
+
+  //--------------------------------------
+  // Beam PID
+  TClonesArray *pla_array = (TClonesArray*)sman->FindDataContainer("BigRIPSPlastic");
+
+  TArtPlastic *F3Pla = 0;
+  TArtPlastic *F5Pla = 0;
+  TArtPlastic *F7Pla = 0;
+  TArtPlastic *F13APla = 0;
+  TArtPlastic *F13BPla = 0;
+  TArtPlastic *SBV = 0;
+
+  int n=pla_array->GetEntries();
+  for (Int_t i=0;i<n;++i){
+    TArtPlastic* pla = (TArtPlastic*)pla_array->At(i);
+    Int_t ID= pla->GetID();
+    if (ID==1){// F3 plastic
+      F3Pla = pla;
+    }else if (ID==2){// F5 plastic
+      F5Pla = pla;
+    }else if (ID==3){// F7 plastic
+      F7Pla = pla;
+    }else if (ID==4){// F13A SBT1
+      F13APla = pla;
+    }else if (ID==5){// F13B SBT2
+      F13BPla = pla;
+    }else if (ID==6){// SBV
+      SBV = pla;
+    }
+  }
+
+  //printf("F3Pla\n ");
+  //dump_pla(F3Pla);
+  //printf("F5Pla\n ");
+  //dump_pla(F5Pla);
+  //printf("F7Pla\n ");
+  //dump_pla(F7Pla);
+  //printf("F13APla\n ");
+  //dump_pla(F13APla);
+  //printf("F13BPla\n ");
+  //dump_pla(F13BPla);
+  //printf("SBV\n ");
+  //dump_pla(SBV);
+  //printf("\n");
+  //printf("F7: %d, %d\n", F7Pla->GetQTCLRawWidth(), F7Pla->GetQTCRRawWidth());
+
+  fF3TLRaw = kNaN;
+  fF3TRRaw = kNaN;
+  fF3QLRaw = kNaN;
+  fF3QRRaw = kNaN;
+  fF3QTCLRawStart = kNaN;
+  fF3QTCRRawStart = kNaN;
+  fF3QTCLRawWidth = kNaN;
+  fF3QTCRRawWidth = kNaN;
+  fF3NHitL = 0;
+  fF3NHitR = 0;
+
+  fF5TLRaw = kNaN;
+  fF5TRRaw = kNaN;
+  fF5QLRaw = kNaN;
+  fF5QRRaw = kNaN;
+  fF5QTCLRawStart = kNaN;
+  fF5QTCRRawStart = kNaN;
+  fF5QTCLRawWidth = kNaN;
+  fF5QTCRRawWidth = kNaN;
+  fF5NHitL = 0;
+  fF5NHitR = 0;
+
+  fF7TLRaw = kNaN;
+  fF7TRRaw = kNaN;
+  fF7QLRaw = kNaN;
+  fF7QRRaw = kNaN;
+  fF7QTCLRawStart = kNaN;
+  fF7QTCRRawStart = kNaN;
+  fF7QTCLRawWidth = kNaN;
+  fF7QTCRRawWidth = kNaN;
+  fF7NHitL = 0;
+  fF7NHitR = 0;
+
+  fF13AQLRaw = kNaN;
+  fF13AQRRaw = kNaN;
+  fF13BQLRaw = kNaN;
+  fF13BQRRaw = kNaN;
+
+  for (Int_t i=0; i<kArraySize; ++i) {
+    fF3MulHitTDCL[i] = kNaN;
+    fF3MulHitTDCR[i] = kNaN;
+    fF5MulHitTDCL[i] = kNaN;
+    fF5MulHitTDCR[i] = kNaN;
+    fF7MulHitTDCL[i] = kNaN;
+    fF7MulHitTDCR[i] = kNaN;
+  }
+
+  fF3T_BR = kNaN;
+  fF3T_SM = kNaN;
+  fF5DT = kNaN;
+  fF5Xpla = kNaN;
+  fF7T_BR = kNaN;
+  fF7T_SM = kNaN;
+  fF7Q = kNaN;
+  fToF37_BR = kNaN;
+  fToF37_SM = kNaN;
+
+  fbeta37 = kNaN;
+  fgamma37 = kNaN;
+  fBetheF = kNaN;
+  fZ_tmp = kNaN;
+  fZ = kNaN;
+  fdelta = kNaN;
+  fBrhoF5 = kNaN;
+  fAoQ = kNaN;
+  fdE = kNaN;
+
+  if (F3Pla !=0) {
+    fF3TLRaw = F3Pla->GetTLRaw()>0 ? F3Pla->GetTLRaw() : kNaN;
+    fF3TRRaw = F3Pla->GetTRRaw()>0 ? F3Pla->GetTRRaw() : kNaN;
+    fF3QLRaw = F3Pla->GetQLRaw();
+    fF3QRRaw = F3Pla->GetQRRaw();
+    fF3QTCLRawStart = F3Pla->GetQTCLRawStart()>0 ? F3Pla->GetQTCLRawStart() : kNaN;
+    fF3QTCRRawStart = F3Pla->GetQTCRRawStart()>0 ? F3Pla->GetQTCRRawStart() : kNaN;
+    fF3QTCLRawWidth = F3Pla->GetQTCLRawWidth()>0 ? F3Pla->GetQTCLRawWidth() : kNaN;
+    fF3QTCRRawWidth = F3Pla->GetQTCRRawWidth()>0 ? F3Pla->GetQTCRRawWidth() : kNaN;
+    fF3NHitL = F3Pla->GetNHitL();
+    fF3NHitR = F3Pla->GetNHitR();
+    for (Int_t i=0; i<fF3NHitL; ++i) {
+      fF3MulHitTDCL[i] = F3Pla->GetMulHitTDCL(i);
+    }
+    for (Int_t i=0; i<fF3NHitR; ++i) {
+      fF3MulHitTDCR[i] = F3Pla->GetMulHitTDCR(i);
+    }
+  }
+  if (F5Pla !=0) {
+    fF5TLRaw = F5Pla->GetTLRaw()>0 ? F5Pla->GetTLRaw() : kNaN;
+    fF5TRRaw = F5Pla->GetTRRaw()>0 ? F5Pla->GetTRRaw() : kNaN;
+    fF5QLRaw = F5Pla->GetQLRaw();
+    fF5QRRaw = F5Pla->GetQRRaw();
+    fF5QTCLRawStart = F5Pla->GetQTCLRawStart()>0 ? F5Pla->GetQTCLRawStart() : kNaN;
+    fF5QTCRRawStart = F5Pla->GetQTCRRawStart()>0 ? F5Pla->GetQTCRRawStart() : kNaN;
+    fF5QTCLRawWidth = F5Pla->GetQTCLRawWidth()>0 ? F5Pla->GetQTCLRawWidth() : kNaN;
+    fF5QTCRRawWidth = F5Pla->GetQTCRRawWidth()>0 ? F5Pla->GetQTCRRawWidth() : kNaN;
+    fF5NHitL = F5Pla->GetNHitL();
+    fF5NHitR = F5Pla->GetNHitR();
+    for (Int_t i=0; i<fF5NHitL; ++i) {
+      fF5MulHitTDCL[i] = F5Pla->GetMulHitTDCL(i);
+    }
+    for (Int_t i=0; i<fF5NHitR; ++i) {
+      fF5MulHitTDCR[i] = F5Pla->GetMulHitTDCR(i);
+    }
+  }
+  if (F7Pla !=0) {
+    fF7TLRaw = F7Pla->GetTLRaw()>0 ? F7Pla->GetTLRaw() : kNaN;
+    fF7TRRaw = F7Pla->GetTRRaw()>0 ? F7Pla->GetTRRaw() : kNaN;
+    fF7QLRaw = F7Pla->GetQLRaw();
+    fF7QRRaw = F7Pla->GetQRRaw();
+    fF7QTCLRawStart = F7Pla->GetQTCLRawStart()>0 ? F7Pla->GetQTCLRawStart() : kNaN;
+    fF7QTCRRawStart = F7Pla->GetQTCRRawStart()>0 ? F7Pla->GetQTCRRawStart() : kNaN;
+    fF7QTCLRawWidth = F7Pla->GetQTCLRawWidth()>0 ? F7Pla->GetQTCLRawWidth() : kNaN;
+    fF7QTCRRawWidth = F7Pla->GetQTCRRawWidth()>0 ? F7Pla->GetQTCRRawWidth() : kNaN;
+    fF7NHitL = F7Pla->GetNHitL();
+    fF7NHitR = F7Pla->GetNHitR();
+    for (Int_t i=0; i<fF7NHitL; ++i) {
+      fF7MulHitTDCL[i] = F7Pla->GetMulHitTDCL(i);
+    }
+    for (Int_t i=0; i<fF7NHitR; ++i) {
+      fF7MulHitTDCR[i] = F7Pla->GetMulHitTDCR(i);
+    }
+    fF7Q = sqrt(fF7QTCLRawWidth*fF7QTCRRawWidth);
+  }
+
+  if (fF3NHitL>0 && fF3NHitR>0) {
+    fF3T_BR = ((fF3MulHitTDCL[0]+fF3MulHitTDCR[0])*0.5 - fTRef)*kch2ns;
+  }
+  if (fF3TLRaw>51591.150 && fF3TRRaw>51591.150+81.2) {
+    fF3T_SM = F3Pla->GetTime()>0 ? F3Pla->GetTime() : 0;
+  }
+
+  if (fF5NHitL>0 && fF5NHitR>0) {
+    fF5DT = fF5MulHitTDCL[0]-fF5MulHitTDCR[0];
+    if (fF5DT<-350.)
+      fF5DT = kNaN;
+    fF5Xpla = f5x(fF5DT);
+  }
+
+  if (fF7NHitL>0 && fF7NHitR>0) {
+    fF7T_BR = ((fF7MulHitTDCL[0]+fF7MulHitTDCR[0])*0.5 - fTRef)*kch2ns;
+  }
+  if (fF7TLRaw>48700 && fF7TRRaw>48500) {
+    fF7T_SM = F7Pla->GetTime()>0 ? F7Pla->GetTime() : 0;
+  }
+
+
+  if (F13APla!=0 && F13BPla!=0) {
+    fF13AQLRaw = F13APla->GetQLRaw()>0 ? F13APla->GetQLRaw() : kNaN;
+    fF13AQRRaw = F13APla->GetQRRaw()>0 ? F13APla->GetQRRaw() : kNaN;
+    fF13BQLRaw = F13BPla->GetQLRaw()>0 ? F13BPla->GetQLRaw() : kNaN;
+    fF13BQRRaw = F13BPla->GetQRRaw()>0 ? F13BPla->GetQRRaw() : kNaN;
+  }
+  
+  fToF37_BR = fF7T_BR-fF3T_BR+kToF37offset_BR;
+  fToF37_SM = fF7T_SM-fF3T_SM+kToF37offset_SM;
+
+  fbeta37 = kfpl37/(fToF37_SM*kc);
+  fgamma37 = 1/sqrt(1-fbeta37*fbeta37);
+  fBetheF = BetheF(fbeta37);
+  fZ_tmp = sqrt(fF7Q/(fBetheF-1));
+  fZ = fZ_tmp*1.5-3.65;
+  fdelta = fF5Xpla/(kxd*100);
+  fBrhoF5 = kBrho0*(1+fdelta);
+  fAoQ = fBrhoF5/kBrhoop/(kmamu*fbeta37*fgamma37);
+
+  /*
+  if (F7Pla !=0 && F13APla !=0){
+    // kore deha PID dekinai
+    // Nakada method needs to be implemented
+    // F7Q ... QDC -> QTC
+    // TOF is not sufficient TOF -> F5x correction
+    double F7T = 0.5*(F7Pla->GetTLRaw()+F7Pla->GetTRRaw());
+    double F13T1 = 0.5*(F13APla->GetTLRaw()+F13APla->GetTRRaw());
+    double F7Q = sqrt(F7Pla->GetQLRaw()*F7Pla->GetQRRaw());
+    double F7Q_QTC = sqrt(F7Pla->GetQTCLRawWidth()*F7Pla->GetQTCRRawWidth());
+    double F13Q1 = sqrt(F13APla->GetQLRaw()*F13APla->GetQRRaw());
+    fhpla_pid->Fill(F13T1-F7T,F7Q);
+    //fhpla_pid2->Fill(F13T1-F7T,F7Q_QTC);
+
+    if (F5Pla !=0 ){
+      double F5dT = F5Pla->GetTLRaw() - F5Pla->GetTRRaw();
+      fhpla_tof713dt5->Fill(F13T1-F7T,F5dT);
+      
+      if (F3Pla !=0 ){
+        double F3T = 0.5*(F3Pla->GetTLRaw()+F3Pla->GetTRRaw());
+        double F3Q = sqrt(F3Pla->GetQLRaw()*F3Pla->GetQRRaw());
+        fhpla_tof313dt5->Fill(F13T1-F3T,F5dT);
+        fhpla_tof313dt5_cal->Fill(F13T1-F3T - F5dT / 0.586576,F5dT);
+        fhpla_pid2->Fill(F13T1-F3T - F5dT / 0.586576,F7Q_QTC);
+        fhpla_pid3->Fill(F13T1-F3T - F5dT / 0.586576,F7Q_QTC);
+        //hzvsaoq->Fill(F13T1-F3T - F5dT / 0.586576, F7Q_QTC*0.00230245+9.36899); // Z:1280
+	//hzvsaoq->Fill(F13T1-F3T - F5dT / 0.586576, F7Q_QTC*0.00230245+9.36899-2); // Z:1032
+      }
+
+    }
+  }
+  if (F3Pla!=0 && F7Pla!=0) {
+    Double_t ff3t_2 = F3Pla->GetTime();
+    Double_t ff7t_2 = F7Pla->GetTime();
+
+    Double_t ff3t_1 = kNaN;
+    Double_t ff7t_1 = kNaN;
+    if (F3Pla->GetNHitL()>0 && F3Pla->GetNHitR()>0) {
+      ff3t_1 = (F3Pla->GetMulHitTDCL(0) + F3Pla->GetMulHitTDCR(0))/2 * 0.0244140625;
+    }
+    if (F7Pla->GetNHitL()>0 && F7Pla->GetNHitR()>0) {
+      ff7t_1 = (F7Pla->GetMulHitTDCL(0) + F7Pla->GetMulHitTDCR(0))/2 * 0.0244140625;
+    }
+
+    hf3t_1->Fill(ff3t_1);
+    hf7t_1->Fill(ff7t_1);
+    hf3t_2->Fill(ff3t_2);
+    hf7t_2->Fill(ff7t_2);
+
+    htof37_1->Fill(ff7t_1-ff3t_1);
+    htof37_2->Fill(ff7t_1-ff3t_2);
+    htof37_3->Fill(ff7t_2-ff3t_1);
+    htof37_4->Fill(ff7t_2-ff3t_2);
+    htof37br_tof37sm -> Fill(ff7t_2-ff3t_2, ff7t_1-ff3t_1);
+    htof37diff_tof37sm -> Fill(ff7t_2-ff3t_2, (ff7t_1-ff3t_1) - (ff7t_2-ff3t_2));
+  }
+
+  if (F3Pla !=0) {
+    for (Int_t n=0; n<F3Pla->GetNHitL(); ++n) {
+      hf3lr_2->Fill(F3Pla->GetMulHitTDCL(n));
+    }
+    for (Int_t n=0; n<F3Pla->GetNHitR(); ++n) {
+      hf3rr_2->Fill(F3Pla->GetMulHitTDCR(n));
+    }
+  }
+
+  if (F5Pla !=0) {
+    for (Int_t n=0; n<F5Pla->GetNHitL(); ++n) {
+      hf5lr_2->Fill(F5Pla->GetMulHitTDCL(n));
+    }
+    for (Int_t n=0; n<F5Pla->GetNHitR(); ++n) {
+      hf5rr_2->Fill(F5Pla->GetMulHitTDCR(n));
+    }
+  }
+
+  if (F7Pla !=0) {
+    Double_t tl0 = kNaN;
+    Double_t tr0 = kNaN;
+    for (Int_t n=0; n<F7Pla->GetNHitL(); ++n) {
+      hf7lr_2->Fill(F7Pla->GetMulHitTDCL(n));
+      tl0 = F7Pla->GetMulHitTDCL(0);
+    }
+    for (Int_t n=0; n<F7Pla->GetNHitR(); ++n) {
+      hf7rr_2->Fill(F7Pla->GetMulHitTDCR(n));
+      tr0 = F7Pla->GetMulHitTDCR(0);
+    }
+    Double_t ql = F7Pla->GetQTCLRawWidth();
+    Double_t qr = F7Pla->GetQTCRRawWidth();
+    //hf7qrl->Fill(F7Pla->GetQTCLRawWidth(), F7Pla->GetQTCRRawWidth());
+    hf7qrl->Fill(ql, qr);
+    hf7qtd->Fill(tr0-tl0, sqrt(ql*qr));
+    hf7qrtd->Fill(tr0-tl0, log(qr/ql));
+  }
+  */
+
+  // PPAC
+  TClonesArray *ppac_array = (TClonesArray*)sman->FindDataContainer("BigRIPSPPAC");
+
+  TArtPPAC *F5PPAC1A = 0;
+  TArtPPAC *F5PPAC1B = 0;
+  TArtPPAC *F5PPAC2A = 0;
+  TArtPPAC *F5PPAC2B = 0;
+  n=ppac_array->GetEntries();
+  for (Int_t i=0;i<n;++i){
+    TArtPPAC* ppac = (TArtPPAC*)ppac_array->At(i);
+    Int_t ID= ppac->GetID();
+    if (ID==10){
+      F5PPAC1A = ppac;
+    } else if (ID==11){
+      F5PPAC1B = ppac;
+    } else if (ID==12){
+      F5PPAC2A = ppac;
+    } else if (ID==13){
+      F5PPAC2B = ppac;
+    }
+  }
+  // if (F5PPAC1A!=0 && F5PPAC1B!=0 && F5PPAC2A!=0 && F5PPAC2B!=0) {
+    
+  // }
+ 
+  fF3_X = kNaN;
+  fF3_Y = kNaN;
+  fF3_A = kNaN;
+  fF3_B = kNaN;
+  fF5_X = kNaN;
+  fF5_Y = kNaN;
+  fF5_A = kNaN;
+  fF5_B = kNaN;
+  fF7_X = kNaN;
+  fF7_Y = kNaN;
+  fF7_A = kNaN;
+  fF7_B = kNaN;
+
+  //TClonesArray *fp_array = fCalibFocalPlane->GetFocalPlaneArray();
+  TClonesArray *fp_array = (TClonesArray*)sman->FindDataContainer("BigRIPSFocalPlane");
+  n = fp_array->GetEntries();
+  for (int i=0;i<n;++i){
+    TVectorD *vec;
+    TArtFocalPlane *focalplane = (TArtFocalPlane*)fp_array->At(i);
+    Int_t ID = focalplane->GetID();
+    vec=focalplane->GetOptVector();
+    // //F7X = (*vec)(0); F7A = (*vec)(1); F7Y = (*vec)(2); F7B = (*vec)(3);
+    // hidx->Fill(ID, (*vec)(0));
+    // hida->Fill(ID, (*vec)(1));
+    // hidy->Fill(ID, (*vec)(2));
+    // hidb->Fill(ID, (*vec)(3));
+
+    if ((*vec)(0)>-1000 && (*vec)(1)>-1000 && (*vec)(2)>-1000 && (*vec)(3)>-1000){
+      if (ID==4) {
+	fF3_X = (*vec)(0);
+	fF3_A = (*vec)(1);
+	fF3_Y = (*vec)(2);
+	fF3_B = (*vec)(3);
+      } else if (ID==6) {
+	fF5_X = (*vec)(0);
+	fF5_A = (*vec)(1);
+	fF5_Y = (*vec)(2);
+	fF5_B = (*vec)(3);
+      } else if (ID==8) {
+	fF7_X = (*vec)(0);
+	fF7_A = (*vec)(1);
+	fF7_Y = (*vec)(2);
+	fF7_B = (*vec)(3);
+      }
+    }
+    /*
+    if (F5Pla!=0 && F5PPAC1A!=0 && F5PPAC1B!=0 && F5PPAC2A!=0 && F5PPAC2B!=0) {
+      //Double_t f5dt = F5Pla->GetTLRaw() - F5Pla->GetTRRaw();
+      //Double_t f5dt = F5Pla->GetMulHitTDCL(0) - F5Pla->GetMulHitTDCR(0);
+      Double_t f5dt = kNaN;
+      if (F5Pla->GetNHitL()>0 && F5Pla->GetNHitR()>0) {
+	f5dt = F5Pla->GetMulHitTDCL(0) - F5Pla->GetMulHitTDCR(0);
+      }
+      Double_t f5dt2 = F5Pla->GetTLRaw() - F5Pla->GetTRRaw();
+      hf5dt_f5x->Fill((*vec)(0), f5dt);
+      hf5dt2_f5x->Fill((*vec)(0), f5dt2);
+      hf5dt_f51ax->Fill(F5PPAC1A->GetX(), f5dt);
+      hf5dt_f51bx->Fill(F5PPAC1B->GetX(), f5dt);
+      hf5dt_f52ax->Fill(F5PPAC2A->GetX(), f5dt);
+      hf5dt_f52bx->Fill(F5PPAC2B->GetX(), f5dt);
+      hf51bxf5dt->Fill(f5dt, F5PPAC1B->GetX());
+      hf51bxf5dtx->Fill(f5x(f5dt), F5PPAC1B->GetX());
+    }
+    */
+  }
+
+  /*
+  if (F3Pla!=0 && F5Pla!=0 && F7Pla!=0) {
+    Double_t ff3t = kNaN;
+    Double_t ff5dt = kNaN;
+    Double_t ff7t = kNaN;
+    Double_t ff7q = kNaN;
+    Double_t ff5dtx = kNaN;
+    Double_t ftof37 = kNaN;
+    Double_t fbeta37 = kNaN;
+    Double_t fgamma37 = kNaN;
+    Double_t fBetheF = kNaN;
+    Double_t fZ_tmp = kNaN;
+    Double_t fZ = kNaN;
+    Double_t fdelta = kNaN;
+    Double_t fBrhoF5 = kNaN;
+    Double_t fAoQ = kNaN;
+    Double_t fdE = kNaN;
+
+    if (F3Pla->GetNHitL()>0 && F3Pla->GetNHitR()>0) {
+      ff3t = (F3Pla->GetMulHitTDCL(0) + F3Pla->GetMulHitTDCR(0))/2 * 0.0244140625;
+    }
+    if (F5Pla->GetNHitL()>0 && F5Pla->GetNHitR()>0) {
+      ff5dt = F5Pla->GetMulHitTDCL(0) - F5Pla->GetMulHitTDCR(0);
+      ff5dtx = f5x(ff5dt);
+    }
+    if (F7Pla->GetNHitL()>0 && F7Pla->GetNHitR()>0) {
+      ff7t = (F7Pla->GetMulHitTDCL(0) + F7Pla->GetMulHitTDCR(0))/2 * 0.0244140625;
+      //ff7q = sqrt(F7Pla->GetQTCLRawWidth()*F7Pla->GetQTCRRawWidth()) *0.00230245+9.36899-2; // 1032
+      ff7q = sqrt(F7Pla->GetQTCLRawWidth()*F7Pla->GetQTCRRawWidth());
+    }
+    ftof37 = ff7t-ff3t + kToF37offset_BR;
+
+    fbeta37 = kfpl37/(ftof37*kc);
+    fgamma37 = 1/sqrt(1-fbeta37*fbeta37);
+    fBetheF = BetheF(fbeta37);
+    fZ_tmp = sqrt(ff7q/(fBetheF-1));
+    fZ = fZ_tmp;
+    fdelta = ff5dtx/(kxd*100);
+    fBrhoF5 = kBrho0*(1+fdelta);
+    fAoQ = fBrhoF5/kBrhoop/(kmamu*fbeta37*fgamma37);
+
+    Double_t ftmp=kNaN;
+    if (15.6<fZ_tmp && fZ_tmp<16.0) {
+      ftmp = 20;
+    } else if (16.3<fZ_tmp && fZ_tmp<16.7) {
+      ftmp = 21;
+    } else if (17.0<fZ_tmp && fZ_tmp<17.4) {
+      ftmp = 22;
+    } else if (17.6<fZ_tmp && fZ_tmp<18.0) {
+      ftmp = 23;
+    }
+    fdE = ftmp*ftmp * fBetheF;
+
+    htof37f5dtx->Fill(ff5dtx, ftof37);
+    //hzvstof37->Fill(ftof37, ff7q);
+    hzvstof37->Fill(ftof37, fZ);
+    hbeta37tof37->Fill(ftof37, fbeta37);
+    hBetheFbeta37->Fill(fbeta37, fBetheF);
+    hBrhoF5beta37->Fill(fbeta37, fBrhoF5);
+    hAoQBrhoF5->Fill(fBrhoF5, fAoQ);
+    hzvsaoq->Fill(fAoQ, fZ);
+    hdEBetheF->Fill(fBetheF, fdE);
+
+    if (-85<ff5dt && ff5dt<-75) {
+      htof37f5dtx2->Fill(ff5dtx, ftof37);
+      //hzvstof372->Fill(ftof37, ff7q);
+      hzvstof372->Fill(ftof37, fZ);
+      hbeta37tof372->Fill(ftof37, fbeta37);
+      hBetheFbeta372->Fill(fbeta37, fBetheF);
+    }
+  }
+  */
+
+
+
+  //--------------------------------------
+  // check efficiency of DCs
+  //
+  bool isBDC1OK = false;
+  bool isBDC2OK = false;
+  bool isFDC1OK = false;
+  // double fBDC1_X = -9999, fBDC1_Y= -9999,fBDC1_ThetaX= -9999,fBDC1_ThetaY= -9999;
+  // double fBDC2_X = -9999, fBDC2_Y= -9999,fBDC2_ThetaX= -9999,fBDC2_ThetaY= -9999;
+  // double fFDC1_X = -9999, fFDC1_Y= -9999,fFDC1_ThetaX= -9999,fFDC1_ThetaY= -9999;
+  fBDC1_X = kNaN;
+  fBDC1_Y = kNaN;
+  fBDC1_ThetaX = kNaN;
+  fBDC1_ThetaY = kNaN;
+  fBDC2_X = kNaN;
+  fBDC2_Y = kNaN;
+  fBDC2_ThetaX = kNaN;
+  fBDC2_ThetaY = kNaN;
+  fFDC1_X = kNaN;
+  fFDC1_Y = kNaN;
+  fFDC1_ThetaX = kNaN;
+  fFDC1_ThetaY = kNaN;
+
+  // BDC1 Track
+  TClonesArray *BDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC1Track");
+  
+  if (BDC1Tracks) {
+    Int_t BDC1NumberOfTracks = BDC1Tracks->GetEntries();
+    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+//    std::cout << BDC1NumberOfTracks << std::endl;
+    if(BDC1NumberOfTracks > 0) {
+      TArtDCTrack *TrackBDC1;
+      
+      for(Int_t i = 0; i<BDC1NumberOfTracks; i++) {
+        TrackBDC1 = (TArtDCTrack *)BDC1Tracks->At(i);
+        
+	if(TrackBDC1) {
+
+	  TempXPosition = TrackBDC1->GetPosition(0);
+  	  TempYPosition = TrackBDC1->GetPosition(1);
+	  TempChi2 = TrackBDC1->GetChi2() / (Double_t)TrackBDC1->GetNDF();
+ 
+	  if(TempChi2 > 0) {
+	  
+	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+	      fBDC1_X = TempXPosition;
+  	      fBDC1_ThetaX = TMath::ATan(TrackBDC1->GetAngle(0));
+	      MinChi2x = TempChi2;
+	    }	      
+
+	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+	      fBDC1_Y = TempYPosition;
+  	      fBDC1_ThetaY = TMath::ATan(TrackBDC1->GetAngle(1));
+	      MinChi2y = TempChi2;
+	    }	      
+	  }
+	}
+      }
+
+      isBDC1OK = true;
+    }  
+  }
+
+  // BDC2 Track
+  TClonesArray *BDC2Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIBDC2Track");
+
+  if (BDC2Tracks) {
+    Int_t BDC2NumberOfTracks = BDC2Tracks->GetEntries();
+    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+
+    if(BDC2NumberOfTracks > 0) {
+      TArtDCTrack *TrackBDC2;
+      
+      for(Int_t i = 0; i<BDC2NumberOfTracks; i++) {
+        TrackBDC2 = (TArtDCTrack *)BDC2Tracks->At(i);
+        
+	if(TrackBDC2) {
+
+	  TempXPosition = TrackBDC2->GetPosition(0);
+  	  TempYPosition = TrackBDC2->GetPosition(1);
+	  TempChi2 = TrackBDC2->GetChi2() / (Double_t)TrackBDC2->GetNDF();
+
+	  if(TempChi2 > 0) {
+	  
+	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+	      fBDC2_X = TempXPosition;
+  	      fBDC2_ThetaX = TMath::ATan(TrackBDC2->GetAngle(0));
+	      MinChi2x = TempChi2;
+	    }	      
+
+	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+	      fBDC2_Y = TempYPosition;
+  	      fBDC2_ThetaY = TMath::ATan(TrackBDC2->GetAngle(1));
+	      MinChi2y = TempChi2;
+	    }	      
+	  }
+	}
+      }
+
+      isBDC2OK = true;
+    }      
+  }
+
+//  // FDC1 Track
+//  TClonesArray *FDC1Tracks = (TClonesArray *)sman->FindDataContainer("SAMURAIFDC1Track");
+//
+//  if (FDC1Tracks) {
+//    Int_t FDC1NumberOfTracks = FDC1Tracks->GetEntries();
+//    Double_t TempXPosition=-9999, TempYPosition=-9999, TempChi2 = 1e6, MinChi2x =1e6, MinChi2y =1e6;
+//
+//    if(FDC1NumberOfTracks > 0) {
+//      TArtDCTrack *TrackFDC1;
+//      
+//      for(Int_t i = 0; i<FDC1NumberOfTracks; i++) {
+//        TrackFDC1 = (TArtDCTrack *)FDC1Tracks->At(i);
+//        
+//	if(TrackFDC1) {
+//
+//	  TempXPosition = TrackFDC1->GetPosition(0);
+//  	  TempYPosition = TrackFDC1->GetPosition(1);
+//	  TempChi2 = TrackFDC1->GetChi2() / (Double_t)TrackFDC1->GetNDF();
+//
+//	  if(TempChi2 > 0) {
+//	  
+//	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+//	      fFDC1_X = TempXPosition;
+//  	      fFDC1_ThetaX = TMath::ATan(TrackFDC1->GetAngle(0));
+//	      MinChi2x = TempChi2;
+//	    }	      
+//
+//	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+//	      fFDC1_Y = TempYPosition;
+//  	      fFDC1_ThetaY = TMath::ATan(TrackFDC1->GetAngle(1));
+//	      MinChi2y = TempChi2;
+//	    }	      
+//	  }
+//	}
+//      }
+//
+//      isFDC1OK = true;
+//      //fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
+//    }      
+//  }
+
+  fTGT_X = kNaN;
+  fTGT_Y = kNaN;
+  fTGT_A = kNaN;
+  fTGT_B = kNaN;
+
+  if(abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
+    //Target Position
+    TVector3 bdc1Position(fBDC1_X,fBDC1_Y,kBDC1_Z);
+    TVector3 bdc2Position(fBDC2_X,fBDC2_Y,kBDC2_Z);
+    TVector3 beamDirection=bdc2Position-bdc1Position;
+    beamDirection=beamDirection.Unit();
+
+    TVector3 targetPosition 
+      = bdc1Position +  (kTarget_Z-bdc1Position.Z())/beamDirection.Z()*beamDirection;
+    TArtDCTrack fTargetTrack;
+    fTargetTrack.SetPosition(targetPosition.X(),0);
+    fTargetTrack.SetPosition(targetPosition.Y(),1);
+    fTargetTrack.SetAngle(TMath::ATan(beamDirection.X()/beamDirection.Z())*1000.,0);// mrad
+    fTargetTrack.SetAngle(TMath::ATan(beamDirection.Y()/beamDirection.Z())*1000.,1);
+
+    fTGT_X = fTargetTrack.GetPosition(0);
+    fTGT_Y = fTargetTrack.GetPosition(1);
+    fTGT_A = fTargetTrack.GetAngle(0);
+    fTGT_B = fTargetTrack.GetAngle(1);
+  }
+
+  /*
+  bool isDSBOK = false;
+  for(int i=0;i<8;i++){
+	  CoinDataProcessor *test = (CoinDataProcessor*)fProcessorArray[0];
+	  if(test->GetCoinBit(i)&&i==1){isDSBOK = true;}
+  }    
+
+  if(isDSBOK&&isBDC1OK&&isBDC2OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40) fheff_fdc1->Fill(fFDC1_X,fFDC1_Y);
+  if(isDSBOK&&isBDC1OK&&isFDC1OK&&abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc2->Fill(fBDC2_X,fBDC2_Y);
+  if(isDSBOK&&isBDC2OK&&isFDC1OK&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40&&abs(fFDC1_X)<40&&abs(fFDC1_Y)<40) fheff_bdc1->Fill(fBDC1_X,fBDC1_Y);
+
+  fheff->SetBinContent(1, (double)(fheff_bdc1->Integral())/fheff_bdc1->GetEntries()*100);
+  fheff->SetBinContent(3, (double)(fheff_bdc2->Integral())/fheff_bdc2->GetEntries()*100);
+  fheff->SetBinContent(5, (double)(fheff_fdc1->Integral())/fheff_fdc1->GetEntries()*100);
+
+  //if((int)fheff_bdc1->GetEntries()%100==0){
+  if(fNeve==1000 || fNeve%5000==0 ){
+    cout<<endl<<Form("BDC1 Eff = %4.2f percent",(double)(fheff_bdc1->Integral())/(double)(fheff_bdc1->GetEntries())*100)<<endl;
+    cout<<Form("BDC2 Eff = %4.2f percent",(double)(fheff_bdc2->Integral())/(double)(fheff_bdc2->GetEntries())*100)<<endl;
+    cout<<Form("FDC1 Eff = %4.2f percent",(double)(fheff_fdc1->Integral())/(double)(fheff_fdc1->GetEntries())*100)<<endl;
+  }
+  */
+
+
+
+  //--------------------------------------
+
+
+}
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+//_________________________________________________________________________________
+OnlineConverter::OnlineConverter(TString RidfFile)
+  : festore(0),
+    fInitialize(false), fIsHistBooked(false),
+    fRunName(RidfFile),
+    fResetCount(20000), fDrawTimeInterval(10),
+    fDoesReset(true),
+    f_iplot(0)
+{
+  if (gPad==0) fCanvas = new TCanvas("c1","c1",1200,800);
+  else         fCanvas = gPad->GetCanvas();
+
+
+  TString fFileName = gSystem->BaseName(fRunName);
+  Ssiz_t fdotPos = fFileName.Last('.');
+  if (fdotPos != -1) {
+    fFileName.Remove(fdotPos);
+  }
+
+
+  TString numStr = "";
+  bool numberFound = false;
+  for (int i = 0; i < fFileName.Length(); ++i) {
+    char c = fFileName[i];
+    if (isdigit(c)) {
+      numStr += c;
+      numberFound = true;
+    } else {
+      if (numberFound) break;
+    }
+  }
+  fRunNumber = numStr.Atoi();
+
+
+  //TString fOutFilePath = "rootfiles/OnlineConverter/251209/" + fFileName + ".root";
+  TString fBasePath = "rootfiles/OnlineConverter/251209/";
+  TString fExt = ".root";
+  TString fFinalName = fBasePath + fFileName + fExt;
+
+  Int_t counter=1;
+  while (gSystem->AccessPathName(fFinalName) == kFALSE) {
+    fFinalName.Form("%s%s_%d%s", fBasePath.Data(), fFileName.Data(), counter, fExt.Data());
+    ++counter;
+  }
+
+  fOutFileName = fFinalName;
+  std::cout << "fOutFileName = " << fOutFileName << std::endl;
+
+  std::cout << "fRunNumber = " << fRunNumber << std::endl;
+
+  std::cout<<"OnlineConverter::Run()"<<std::endl;
+}
+//_________________________________________________________________________________
+OnlineConverter::~OnlineConverter()
+{
+  fRootFile->Close();
+  delete festore;
+}
+//_________________________________________________________________________________
+void OnlineConverter::BookHist()
+{
+  fRootFile = new TFile(fOutFileName, "create");
+  //fRootFile = new TFile("OnlineConverter.root","recreate");
+
+  Int_t np = fProcessorArray.size();
+  for (Int_t ip=0;ip<np;++ip){
+    SAMURAIDataProcessor *p = fProcessorArray[ip];
+    p->MakeHistograms(true);
+    fRootFile->cd();
+    p->PrepareHistograms();
+
+    vector<TH1*>* arr = p->GetHistArray();
+    Int_t nhist = arr->size();
+    for (Int_t ihist=0;ihist<nhist;++ihist){
+      fHistArray.push_back( (*arr)[ihist] );
+    }
+  }
+  
+  fIsHistBooked = true;
+}
+//_________________________________________________________________________________
+void OnlineConverter::AnalyzeOneEvent()
+{
+  TArtStoreManager *sman = TArtStoreManager::Instance();
+  if(festore->GetNextEvent()){
+
+    TArtRawEventObject *rawevent = festore->GetRawEventObject();
+    if (rawevent->GetEventNumber()<0) {
+      TArtCore::Error("OnlineConverter.cc","Invalid event ID=%d",rawevent->GetEventNumber());
+    }
+
+
+    Int_t np = fProcessorArray.size();
+
+    for (int ip=0;ip<np;ip++) fProcessorArray[ip]->ClearData();
+    for (int ip=0;ip<np;ip++) fProcessorArray[ip]->ReconstructData();
+
+    for (int ip=0;ip<np;ip++){
+      SAMURAIDataProcessor *p = fProcessorArray[ip];
+      if (p->DoesMakeHistograms()) p->FillHistograms();
+    }
+
+    // tref analysis for BigRIPS MPV
+    fTRef = kNaN;
+    for (int i=0; i<rawevent->GetNumSeg(); ++i) {
+      TArtRawSegmentObject *seg = rawevent->GetSegment(i);
+      int device = seg->GetDevice();
+      int fp = seg->GetFP();
+      int detector = seg->GetDetector();
+      int module = seg->GetModule();
+      for(int j=0;j<seg->GetNumData();++j){
+	TArtRawDataObject *d = seg->GetData(j);
+	int geo = d->GetGeo();
+	int ch = d->GetCh();
+	int val = d->GetVal();
+	int cat = d->GetCategoryID();
+	int det = d->GetDetectorID();
+	int id = d->GetDatatypeID();
+	int edge = d->GetEdge();
+	if (device==0 && fp==63 && detector==3 && ch==31 && edge==0) {
+	  fTRef = val;
+	}
+      }
+    }
+
+    FillUserHist();
+    tree->Fill();
+
+    //------------------------------------------
+    festore->ClearData();
+  }else{
+    std::cout<<std::endl;
+    TArtCore::Info("OnlineConverter.cc","no next event, stop");
+    Draw();
+    stoploop = true;
+  }
+}
+//______________________________________________________________________________
+void OnlineConverter::EventLoop()
+{
+  signal(SIGINT, stop_interrupt);
+  if (fRunName=="online"){
+    festore->Open(0);
+  }else if (fRunName=="nebula"){
+    festore->Open(1);
+  }else {
+    festore->Open(fRunName.Data());
+  }
+
+  TDatime datime_old;
+//  Double_t neve_rate = 0;
+  while(true){
+    gSystem->ProcessEvents();
+    if (fNeve%100==0)
+	std::cout<<"\r"<<fNeve<<" events analyzed"<<std::flush;
+
+    if (stoploop || (fNeve>=fNeveMax)) {
+      stoploop = false;
+      break;
+    }
+
+    EEventType event = static_cast<EEventType>(fCanvas->GetEvent());
+    if(event == kKeyPress){
+      std::cout<<std::endl;
+      int ret = GetKeyCommand();
+      if (ret==-1) break;
+    }
+
+    TDatime datime;
+
+    AnalyzeOneEvent();
+
+    ++fNeve;
+    ++fNeve_monitor;
+
+    if (datime.GetTime() - datime_old.GetTime() > fDrawTimeInterval){
+      //neve_rate = (Double_t)fNeve/(datime.GetTime() - datime_old.GetTime());
+
+      std::cout<<"\r"<<fNeve<<" events analyzed,"
+	       <<fNeve_monitor<<" events for display"<<std::flush;
+		 
+      Draw();
+      //std::cout<<"\r    "<<fNeve_monitor<<" evts are accumulated (Ctrl+C for stop) "<<std::flush;
+      //fRootFile->Write(); // comment out to reduce the file size
+
+      datime_old = datime;
+
+      if (fDoesReset){
+	if (fNeve_monitor>fResetCount){
+	  ResetHist();
+	  fNeve_monitor = 0;
+	}
+      }
+    }//if (datime.GetTime() - datime_old.GetTime() > fDrawTimeInterval){
+
+  }//while(true){
+
+}
+//______________________________________________________________________________
+bool OnlineConverter::Draw()
+{
+  bool retval = false;
+
+  Int_t nxy = fnx*fny;
+
+  Int_t npad=1;
+  TCanvas *c1 = gPad->GetCanvas();
+  c1->Clear();
+  TDatime datime;
+  TString title=fRunName + " (";
+
+  title+=datime.AsString();
+  title+=")";
+  c1->SetTitle(title.Data());
+  c1->Divide(fnx,fny);
+
+  Int_t nhist = fHistArray.size();
+  for(Int_t ihist=0;ihist<nxy;++ihist){
+    c1->cd(npad);
+
+    if ( f_iplot >= nhist ) f_iplot = 0;
+    TH1* hist = fHistArray[f_iplot];
+    if (hist->GetNbinsY()>0) hist->Draw("colz");
+    else                     hist->Draw();
+
+    npad++;
+    if (npad>nxy) npad=1;
+    f_iplot++;
+    if (f_iplot==nhist) {
+      //f_iplot=0;
+      retval = true;
+      break;
+    }
+
+  }
+
+  gPad->Update();
+  return retval;
+}
+//_________________________________________________________________________________
+void OnlineConverter::ResetHist()
+{
+  Int_t nhist = fHistArray.size();
+  for(Int_t ihist=0;ihist<nhist;++ihist){
+    TH1* hist = fHistArray[ihist];
+    //hist->Reset("M");
+    hist->Reset("ICES");
+  }
+}
+//______________________________________________________________________________
+void OnlineConverter::Print(const char* fname)
+{
+  fCanvas->Print(Form("%s[",fname));
+  f_iplot=0;
+  bool IsEnd=false;
+  while (!IsEnd){
+    IsEnd = Draw();
+    fCanvas->Print(Form("%s",fname));
+  }
+  fCanvas->Print(Form("%s]",fname));
+}
+//______________________________________________________________________________
+int OnlineConverter::GetKeyCommand()
+{
+
+
+  Int_t nhist = fHistArray.size();
+  Int_t nxy = fnx*fny;
+
+  while(true){
+    gSystem->ProcessEvents();
+
+    std::cout<<"\r [s]:Start, [q]:Quit, [n]:Next, [b]:Back, [r]:Reset, [p]:Print >"
+	     <<std::flush;
+
+    system("stty raw"); 
+    char input = getchar(); 
+    system("stty cooked"); 
+
+    if(input =='q'){
+      std::cout<<std::endl;
+      return -1;
+
+    } else if (input =='n'){
+      Draw();
+
+    } else if (input =='b'){
+      Int_t num = gPad->GetNumber();
+      f_iplot = nhist - num - nxy;
+      if (f_iplot<0){
+	Int_t remain = nhist%nxy;
+	if (remain==0) f_iplot = nhist - nxy;
+	else           f_iplot = nhist - remain;
+      }
+      Draw();
+
+    } else if (input =='r'){
+      ResetHist();
+
+    } else if (input =='p'){
+      TString fname;
+      std::cout<<std::endl<<"file name >"<<std::flush;
+      std::cin>>fname;
+      std::cout<<"   making "<<fname.Data()<<" ..."<<std::endl;
+      Print(fname.Data());
+      std::cout<<" Done"<<std::endl;
+
+    } else if (input =='s'){
+      std::cout<<std::endl;
+      break;
+    }
+
+  }
+  return 0;
+}
+//______________________________________________________________________________
