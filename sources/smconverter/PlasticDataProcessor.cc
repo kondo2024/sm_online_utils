@@ -32,11 +32,8 @@ void PlasticDataProcessor::PrepareHistograms()
   //fhidql = new TH2D("pla_idql","Plastic ID QLRaw",10,0.5,10.5,100,0,4000);
   //fhidqr = new TH2D("pla_idqr","Plastic ID QRRaw",10,0.5,10.5,100,0,4000);
   //Test
-  fhidql = new TH2D("pla_idql","Plastic ID QLRaw",10,0.5,10.5,200,0,800);
-  fhidqr = new TH2D("pla_idqr","Plastic ID QRRaw",10,0.5,10.5,200,0,800);
-
-
-
+  fhidql = new TH2D("pla_idql","Plastic ID QLRaw",10,0.5,10.5,200,0,2000);
+  fhidqr = new TH2D("pla_idqr","Plastic ID QRRaw",10,0.5,10.5,200,0,2000);
 
   fHistArray.push_back(fhidtl);
   fHistArray.push_back(fhidtr);

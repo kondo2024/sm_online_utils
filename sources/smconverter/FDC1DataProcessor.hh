@@ -13,7 +13,7 @@ class FDC1DataProcessor : public SAMURAIDataProcessor
 public: 
 
   FDC1DataProcessor()
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "FDC1";
     fdbFileName = "db/SAMURAIFDC1.xml";
@@ -21,7 +21,7 @@ public:
   ~FDC1DataProcessor(){;}
 
   FDC1DataProcessor(const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "FDC1";
     fdbFileName = "db/SAMURAIFDC1.xml";
@@ -29,7 +29,7 @@ public:
   }
 
   FDC1DataProcessor(const char* inputdbfilename, const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "FDC1";
     fdbFileName = inputdbfilename;
@@ -46,14 +46,16 @@ public:
   void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
   void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;} 
   void LoadDCTDCDistribution();
-
+  void DoTracking(bool tf=true){fDoTracking = tf;}
+  
 protected:
   TArtCalibFDC1Hit*   fCalibFDC1Hit;
   TArtCalibFDC1Track* fCalibFDC1Track;
 
   const char* fTDCDistFileName;
   const char* fdbFileName;
-
+  Bool_t fDoTracking;
+  
   // histograms
   TH1* fhidt_fdc1;
   TH1* fhxy_fdc1;

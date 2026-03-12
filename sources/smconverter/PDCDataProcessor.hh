@@ -13,7 +13,7 @@ class PDCDataProcessor : public SAMURAIDataProcessor
 public: 
 
   PDCDataProcessor()
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "PDC";
     fdbFileName = "db/SAMURAIPDC.xml";
@@ -21,7 +21,7 @@ public:
   ~PDCDataProcessor(){;}
 
   PDCDataProcessor(const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "PDC";
     fdbFileName = "db/SAMURAIPDC.xml";
@@ -29,7 +29,7 @@ public:
   }
  
   PDCDataProcessor(const char* inputdbfilename, const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "PDC";
     fdbFileName = inputdbfilename;
@@ -45,14 +45,16 @@ public:
 
   void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
   void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;} 
-
+  void DoTracking(bool tf=true){fDoTracking = tf;}
+  
 protected:
   TArtCalibPDCHit*   fCalibPDCHit;
   TArtCalibPDCTrack* fCalibPDCTrack;
 
   const char* fTDCDistFileName;
   const char* fdbFileName;
-
+  Bool_t fDoTracking;
+  
   // histograms
   TH1* fhidt_pdc;
   TH1* fhidtot_pdc;

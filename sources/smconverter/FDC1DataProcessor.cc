@@ -16,6 +16,8 @@ void FDC1DataProcessor::PrepareCalib()
   fCalibFDC1Hit = new TArtCalibFDC1Hit;
   fCalibFDC1Track = new TArtCalibFDC1Track;
 
+  fCalibFDC1Track->SetTDCWindow(0,3000);// temp for 2025MS (2025.05.29)
+  //fCalibFDC1Track->SetTDCWindow(4000,4700);// temp for 2025MS (2025.05.29)
   LoadDCTDCDistribution();
 
   fCalibReady = true;
@@ -34,7 +36,7 @@ void FDC1DataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_fdc1 = new TH2D("fdc1_idtu","FDC1 ID Traw",448,0.5,448.5,100,0,3000);
+  fhidt_fdc1 = new TH2D("fdc1_idtu","FDC1 ID Traw",448,0.5,448.5,100,0,5000);
   fhxy_fdc1 = new TH2D("fdc1_xy","FDC1 XY",100,-150,150, 100,-150,150);
 
   fHistArray.push_back(fhidt_fdc1);
@@ -51,7 +53,9 @@ void FDC1DataProcessor::ClearData()
 void FDC1DataProcessor::ReconstructData()
 {
   fCalibFDC1Hit->ReconstructData();
-  fCalibFDC1Track->ReconstructData();
+  if (fDoTracking){
+    fCalibFDC1Track->ReconstructData();
+  }
 }
 //____________________________________________________________________
 void FDC1DataProcessor::FillHistograms()
@@ -67,6 +71,7 @@ void FDC1DataProcessor::FillHistograms()
     fhidt_fdc1->Fill(id,traw);
   }
 
+  if (!fDoTracking) return;
 
   // FDC1 Track
   TClonesArray *FDC1Tracks = fCalibFDC1Track->GetDCTrackArray();
@@ -117,7 +122,7 @@ void FDC1DataProcessor::LoadDCTDCDistribution() {
 
   TFile *RootFile = new TFile(fTDCDistFileName,"READ");
 
-  if(RootFile) {
+  if(RootFile->IsOpen()) {
     gROOT->cd();
     TH1D *Hist1D = NULL;
     Int_t FDC1NumberOfLayers = 14;
@@ -134,6 +139,9 @@ void FDC1DataProcessor::LoadDCTDCDistribution() {
       else
       std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hfdc1tdc%d",i) << "\e[0m" << std::endl;
     }
+  }else{
+    fDoTracking = false;
+    std::cout << "\e[35m " << "Skip FDC1 tracking " << "\e[0m" << std::endl;
   }
 
   pwd->cd();

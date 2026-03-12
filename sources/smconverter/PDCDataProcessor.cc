@@ -15,7 +15,6 @@ void PDCDataProcessor::PrepareCalib()
   fCalibPDCHit = new TArtCalibPDCHit;
   fCalibPDCTrack = new TArtCalibPDCTrack;
 
-
   fCalibReady = true;
 }
 //____________________________________________________________________
@@ -32,7 +31,7 @@ void PDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_pdc = new TH2D("pdc_idt","PDC ID Traw",816,0.5,816.5,100,0,3000);
+  fhidt_pdc = new TH2D("pdc_idt","PDC ID Traw",816,0.5,816.5,100,0,10000);
   fhidtot_pdc = new TH2D("pdc_idtot","PDC ID TOT raw",816,0.5,816.5,100,0,2000);
   fhxy_pdc = new TH2D("pdc_xy","PDC XY",100,-900,900, 100,-450,450);
 
@@ -51,7 +50,9 @@ void PDCDataProcessor::ClearData()
 void PDCDataProcessor::ReconstructData()
 {
   fCalibPDCHit->ReconstructData();
-  fCalibPDCTrack->ReconstructData();
+  if (fDoTracking){
+    fCalibPDCTrack->ReconstructData();
+  }
 }
 //____________________________________________________________________
 void PDCDataProcessor::FillHistograms()
@@ -66,10 +67,12 @@ void PDCDataProcessor::FillHistograms()
     Double_t traw = hit->GetTDC();
     Double_t trail = hit->GetTrailTDC();
     fhidt_pdc->Fill(id,traw);
-    fhidtot_pdc->Fill(id,traw-trail);
+    //fhidtot_pdc->Fill(id,traw-trail);
+    fhidtot_pdc->Fill(id,trail-traw);
   }
 
-
+  if (!fDoTracking) return;
+  
 //  // PDC Track
 //  TClonesArray *PDCTracks = fCalibPDCTrack->GetDCTrackArray();
 //  TArtDCTrack *track = (TArtDCTrack*)PDCTracks->At(0);

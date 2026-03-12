@@ -20,8 +20,14 @@ void BDCDataProcessor::PrepareCalib()
   fCalibBDC2Track = new TArtCalibBDC2Track;
   fTargetTrack = new TArtDCTrack;
 
+  fCalibBDC1Track->SetTDCWindow(0,3000);
+  fCalibBDC2Track->SetTDCWindow(0,3000);
+//  fCalibBDC1Track->SetTDCWindow(5500,6500);
+//  fCalibBDC2Track->SetTDCWindow(5500,6500);
+//  fCalibBDC1Track->SetTDCWindow(4000,4700);
+//  fCalibBDC2Track->SetTDCWindow(4000,4700);
   LoadDCTDCDistribution();
-
+  
   fCalibReady = true;
 }
 //____________________________________________________________________
@@ -41,8 +47,8 @@ void BDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,3000);
-  fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,3000);
+  fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,5000);
+  fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,5000);
   fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-50,50, 100,-50,50);
   fhxy_bdc2 = new TH2D("bdc2_xy","BDC2 XY",100,-50,50, 100,-50,50);
   fhxy_tgt = new TH2D("tgt_xy","Target XY",100,-50,50, 100,-50,50);
@@ -82,8 +88,10 @@ void BDCDataProcessor::ReconstructData()
 {
   fCalibBDC1Hit->ReconstructData();
   fCalibBDC2Hit->ReconstructData();
-  fCalibBDC1Track->ReconstructData();
-  fCalibBDC2Track->ReconstructData();
+  if (fDoTracking){
+    fCalibBDC1Track->ReconstructData();
+    fCalibBDC2Track->ReconstructData();
+  }
 }
 //____________________________________________________________________
 void BDCDataProcessor::FillHistograms()
@@ -109,13 +117,15 @@ void BDCDataProcessor::FillHistograms()
     fhidt_bdc2->Fill(id,traw);
   }
 
+  if (!fDoTracking) return;
+
   // BDC1 Track
   TClonesArray *BDC1Tracks = fCalibBDC1Track->GetDCTrackArray();
   
   if (BDC1Tracks) {
     Int_t BDC1NumberOfTracks = BDC1Tracks->GetEntries();
     Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
-//    std::cout << BDC1NumberOfTracks << std::endl;
+    //std::cout << BDC1NumberOfTracks << std::endl;
     if(BDC1NumberOfTracks > 0) {
       TArtDCTrack *TrackBDC1;
       
@@ -223,7 +233,7 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
 
   TFile *RootFile = new TFile(fTDCDistFileName,"READ");
 
-  if(RootFile) {
+  if(RootFile->IsOpen()) {
     gROOT->cd();
     TH1D *Hist1D = NULL;
     Int_t BDCNumberOfLayers = 8;
@@ -251,6 +261,9 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
       else
       std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc2tdc%d",i) << "\e[0m" << std::endl;
     }
+  }else{
+    fDoTracking = false;
+    std::cout << "\e[35m " << "Skip BDC tracking " << "\e[0m" << std::endl;    
   }
 
   pwd->cd();

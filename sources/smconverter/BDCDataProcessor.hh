@@ -16,7 +16,7 @@ class BDCDataProcessor : public SAMURAIDataProcessor
 public: 
 
   BDCDataProcessor()
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "BDC";
     fdbfilename1 = "db/SAMURAIBDC1.xml";
@@ -30,7 +30,7 @@ public:
   ~BDCDataProcessor(){;}
 
   BDCDataProcessor(const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "BDC";
     fdbfilename1 = "db/SAMURAIBDC1.xml";
@@ -44,7 +44,7 @@ public:
   }
 
   BDCDataProcessor(const char* inputdbfilename1,const char* inputdbfilename2, const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor()
+    : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "BDC";
     fdbfilename1 = inputdbfilename1;
@@ -70,7 +70,8 @@ public:
   void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;}
 
   void LoadDCTDCDistribution();
-
+  void DoTracking(bool tf=true){fDoTracking = tf;}
+  
   void SetBDC1Z(Double_t val){fBDC1_Z = val;}
   void SetBDC2Z(Double_t val){fBDC2_Z = val;}
   void SetTargetZ(Double_t val){fTarget_Z = val;}
@@ -89,7 +90,8 @@ protected:
   const char* fTDCDistFileName;
   const char* fdbfilename1;
   const char* fdbfilename2;
-
+  Bool_t fDoTracking;
+  
   // histograms
   TH1* fhidt_bdc1;
   TH1* fhidt_bdc2;
