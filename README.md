@@ -42,7 +42,12 @@ This extracts and saves detector data which coincide with the SAMURAI
 timestamp. NPTOOL is required for complation for PFAD
 filter. $NPTOOL_HOME have to be defined.
 
-### onlinemonitor
+### Onlinemonitor
+- usege: onlinemonitor
+(for using THttpServer)
+
+- usage: onlinemonitor xxxx.ridf
+(for analysis of ridf file)
 
 ### macros
 sample root macros.
