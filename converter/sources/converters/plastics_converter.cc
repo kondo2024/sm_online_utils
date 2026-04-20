@@ -3,7 +3,6 @@
 #include "PlasticDataProcessor.hh"
 #include "HODPlaDataProcessor.hh"
 #include "NEBULADataProcessor.hh"
-#include "FSDBSDDataProcessor.hh"
 #include "NINJADataProcessor.hh"
 #include <iostream>
 
@@ -49,11 +48,6 @@ int main(int argc, char **argv){
   nebula.MakeTreeBranches(true);
   nebula.MakeHistograms(true);
   converter.RegisterDataProcessor(&nebula);
-
-  FSDBSDDataProcessor fsdbsd;
-  fsdbsd.MakeTreeBranches(true);
-  fsdbsd.MakeHistograms(true);
-  converter.RegisterDataProcessor(&fsdbsd);
 
   NINJADataProcessor ninja;
   ninja.MakeTreeBranches(true);
