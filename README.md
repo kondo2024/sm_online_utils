@@ -5,29 +5,34 @@ well as online monitor. Directory structure is like this.
 ```
 sm_online_utils
 ├── README.md
-├── lib
-│   ├── smconverter
-│   └── smfilter
-└─sXXX          (for a specific experiment)
-    ├── bin
-    ├── converters
-    │   ├── Makefile
-    │   └── smts_converter.cc
-    ├── filters
-    │   ├── Makefile
-    │   └── pfad_data_filter.cc
-    ├── macros
-    │   ├── chkmerge.cc
-    │   └── pfad_filter_run.cc
-    └── onlinemonitor
-        ├── OnlineMonitor.cc
-        └── OnlineMonitor.hh
+├── converter
+│   ├── apps
+│   │   ├── plastics_converter.cc
+│   │   ├── bdc_converter.cc
+│   │   └── ...
+│   ├── CMakeLists.txt
+│   ├── include
+│   └── src
+│       ├── PlasticDataProcessor.cc
+│       ├── BDCDataProcessor.cc
+│       └── ...
+├── filters
+├── macros
+│   ├── chkmerge.cc
+│   ├── make_dctdcdists.cc
+│   ├── make_dctdcdists_multi.cc
+│   └── pfad_filter_run.cc
+├── onlinemonitor
+└── prev
+    ├── s0XX (old packaged used in previous exps)
+    └── ...
+
 ```
 
 Required
 
 - ANAROOT
-- NPTOOL
+- (NPTOOL) in future?
 
 ## Converter
 This converts the RIDF data to root tree and/or historgrams.
@@ -37,29 +42,16 @@ This extracts and saves detector data which coincide with the SAMURAI
 timestamp. NPTOOL is required for complation for PFAD
 filter. $NPTOOL_HOME have to be defined.
 
-### DataMergeFilter
-Sample base class. You can inherit it for your application.
-DataMergeFilter_PFAD class is an example. Most of cases can be covered
-by the methods in the base class, but you have to write some part
-(indicated by *****) in DataMergeFilter_XXX::Filter().
+### onlinemonitor
 
-### sXXX/filters/pfad_data_filter.cc
-Sample main program for PFAD using DataMergeFilter_PFAD. "cd src;
-make; make install" generates executable file. NPTOOL is required and
-$NPTOOL_HOME is needed to be defined (see Makefile).
+### macros
+sample root macros.
 
-### sXXX/macros/pfad_run.cc
-sample root macro to use DataMergeFilter_PFAD. They are useful to see what
-is going on in the procedure shown on Canvas. 
-
-### sXXX/macros/chkmerge.cc
-sample root macro to make plots from merged tree data.
-
-
-## OnlineMonitor
-Online data monitor for checking rawdata during beam time.
+### prev/sXXX/
+Old codes used in the previous experiments.
 
 ### usage
+
 1. Add include path of lib/smconverterlib and load
    lib/smconverter/libsmconverter.so in rootlogon.C.
 2. ROOT[0] .L OnlineMonitor.cc+g
@@ -90,14 +82,3 @@ and eventloop will happens. The class is called in
 sXXX/converters/smts_converter.cc, etc.
 
 ### filter
-
-##### DataMergeFilter
-Base class for filter. This class has several useful methods to
-automatically search time stamp offset, correction factor of the time
-stamp period, etc. 
-
-##### DataMergeFilter_XXXX
-This class inherits the base class (DataMergeFilter) for a specific
-detector system. Filter() have to be implemented for the definition of
-the tree branch and initialization. It is recommended to implement
-Run() for easy use. The class is called in sXXX/filters/XXXX_filter.cc 
