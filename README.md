@@ -43,10 +43,15 @@ timestamp. NPTOOL is required for complation for PFAD
 filter. $NPTOOL_HOME have to be defined.
 
 ### Onlinemonitor
-- usege: onlinemonitor
+#### Usage
+```
+onlinemonitor
+```
 (for using THttpServer)
 
-- usage: onlinemonitor xxxx.ridf
+```
+onlinemonitor xxxx.ridf
+```
 (for analysis of ridf file)
 
 ### macros
