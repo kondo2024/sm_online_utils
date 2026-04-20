@@ -6,3 +6,6 @@
 s*/converters/*_converter
 build/*
 install/*
+*.pcm
+*ACLiC*
+*/.root_hist
