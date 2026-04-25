@@ -22,6 +22,7 @@ sm_online_utils
 │   ├── make_dctdcdists.cc
 │   ├── make_dctdcdists_multi.cc
 │   └── pfad_filter_run.cc
+├── dceffplot
 ├── onlinemonitor
 └── prev
     ├── s0XX (old packaged used in previous exps)
@@ -33,6 +34,16 @@ Required
 
 - ANAROOT
 - (NPTOOL) in future?
+
+## Installation
+```
+git clone --recursive https://github.com/kondo2024/sm_online_utils.git
+cd sm_online_utils
+mkdir build
+mkdir install
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=../install ../
+```
 
 ## Converter
 This converts the RIDF data to root tree and/or historgrams.
