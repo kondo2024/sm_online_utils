@@ -37,29 +37,6 @@ Required
 ## Converter
 This converts the RIDF data to root tree and/or historgrams.
 
-## Filter
-This extracts and saves detector data which coincide with the SAMURAI
-timestamp. NPTOOL is required for complation for PFAD
-filter. $NPTOOL_HOME have to be defined.
-
-### Onlinemonitor
-#### Usage
-```
-onlinemonitor
-```
-(for using THttpServer)
-
-```
-onlinemonitor xxxx.ridf
-```
-(for analysis of ridf file)
-
-### macros
-sample root macros.
-
-### prev/sXXX/
-Old codes used in the previous experiments.
-
 ### usage
 
 1. Add include path of lib/smconverterlib and load
@@ -72,6 +49,29 @@ Old codes used in the previous experiments.
 click the canvas and press any key, then analysis is paused and
 several keyboard commands will be available. Ctrl+c stops 
 OnlineMonitor.
+
+## Filter
+This extracts and saves detector data which coincide with the SAMURAI
+timestamp. NPTOOL is required for complation for PFAD
+filter. $NPTOOL_HOME have to be defined.
+
+## Onlinemonitor
+#### Usage
+```
+onlinemonitor
+```
+(for using THttpServer)
+
+```
+onlinemonitor xxxx.ridf
+```
+(for analysis of ridf file with TCanvas, similar to old version)
+
+## macros
+sample root macros.
+
+## prev/sXXX/
+Old codes used in the previous experiments.
 
 - - -
 
