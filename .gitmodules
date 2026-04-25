@@ -1,0 +1,6 @@
+[submodule "onlinemonitor"]
+	path = onlinemonitor
+	url = https://github.com/kondo2024/onlinemonitor.git
+[submodule "dceffplot"]
+	path = dceffplot
+	url = https://github.com/kondo2024/dceffplot.git

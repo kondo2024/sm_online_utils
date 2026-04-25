@@ -24,5 +24,6 @@ include_directories(
 install(DIRECTORY macros/ DESTINATION macros/)
 
 add_subdirectory(converter)
+add_subdirectory(dceffplot)
+add_subdirectory(onlinemonitor)
 #add_subdirectory(filter)
-#add_subdirectory(onlinemonitor)
