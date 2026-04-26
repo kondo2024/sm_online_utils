@@ -19,4 +19,4 @@ foreach(source_file ${APP_SOURCES})
 endforeach()
 
 install(TARGETS smconverter DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include/)
+install(DIRECTORY include/ DESTINATION include/smconverter)
