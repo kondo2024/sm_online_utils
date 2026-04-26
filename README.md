@@ -1,6 +1,7 @@
 # utility package for SAMURAI online analysis
 This package contains these utilities.
 - converters and filters for the data merge
+- ANAROOT macros
 - [onlinemonitor](http://github.com/kondo2024/onlinemonitor)
 - [dceffplot](http://github.com/kondo2024/dceffplot)
 
