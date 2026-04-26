@@ -22,10 +22,6 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 ### smconverter
 1. Add include path of lib/smconverterlib and load
    lib/smconverter/libsmconverter.so in rootlogon.C.
-2. ROOT[0] .L OnlineMonitor.cc+g
-3. ROOT[1] OnlineMonitor *mon = new OnlineMonitor() 
-   // for online data, input ridf file name for offline analysis 
-4. ROOT[2] mon->Run()
 
 click the canvas and press any key, then analysis is paused and
 several keyboard commands will be available. Ctrl+c stops 
@@ -35,7 +31,7 @@ OnlineMonitor.
 sample root macros.
 
 ### Onlinemonitor
-see [README](http://github.com/kondo2024/oninemonitor) of onlinemonitor.
+see [README](http://github.com/kondo2024/onlinemonitor) of onlinemonitor.
 
 ### DC Efficiency plotter
 see [README](http://github.com/kondo2024/dceffplot) of dceffplot. 
@@ -62,9 +58,8 @@ also loaded for drift time -> drift length calibration.
 
 ##### SAMURAIDataConveter
 main class of the converter. After registration of the data
-processors, Run should be called. Then, preparation of tree/histograms
-and eventloop will happens. The class is called in
-sXXX/converters/smts_converter.cc, etc.
+processors, Run() should be called. Then, preparation of tree/histograms
+and event loop will happens. The class is called in main functions, such as smconverters/apps/smts_converter.cc. 
 
 ### filter
 Directory structure is like this. 
@@ -72,7 +67,7 @@ Directory structure is like this.
 ```
 sm_online_utils
 ├── README.md
-├── converter
+├── smconverter
 │   ├── apps
 │   │   ├── plastics_converter.cc
 │   │   ├── bdc_converter.cc
@@ -83,12 +78,9 @@ sm_online_utils
 │       ├── PlasticDataProcessor.cc
 │       ├── BDCDataProcessor.cc
 │       └── ...
-├── filters
 ├── macros
-│   ├── chkmerge.cc
 │   ├── make_dctdcdists.cc
-│   ├── make_dctdcdists_multi.cc
-│   └── pfad_filter_run.cc
+│   └── make_dctdcdists_multi.cc
 ├── dceffplot
 ├── onlinemonitor
 └── prev
