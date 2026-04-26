@@ -8,4 +8,4 @@ build/
 install/
 *.pcm
 *ACLiC*
-*/.root_hist
+.root_hist
