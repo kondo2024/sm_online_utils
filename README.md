@@ -6,7 +6,7 @@ This package contains these packages.
 - [dceffplot](http://github.com/kondo2024/dceffplot): Plotter of DC efficiency curve
 
 ## Installation
-Required
+Requirements
 - ANAROOT, ROOT (v6)
 
 ```
@@ -20,12 +20,13 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 
 ## How to use
 ### smconverter
-1. Add include path of lib/smconverterlib and load
-   lib/smconverter/libsmconverter.so in rootlogon.C.
-
-click the canvas and press any key, then analysis is paused and
-several keyboard commands will be available. Ctrl+c stops 
-OnlineMonitor.
+1. set PATH and LD_LIBRARY_PATH for smconverter.so
+```
+source install/bin/setup_smconverter.sh
+```
+```
+$ smts_converter RunNum
+```
 
 ### macros
 sample root macros.
