@@ -1,13 +1,13 @@
 # utility package for SAMURAI online analysis
-This package contains these utilities.
-- converters and filters for the data merge
+This package contains these packages.
+- smconverter: convert ridf file to root tree
 - ANAROOT macros
-- [onlinemonitor](http://github.com/kondo2024/onlinemonitor)
-- [dceffplot](http://github.com/kondo2024/dceffplot)
+- [onlinemonitor](http://github.com/kondo2024/onlinemonitor): Drawer of online data
+- [dceffplot](http://github.com/kondo2024/dceffplot): Plotter of DC efficiency curve
 
 ## Installation
 Required
-- ANAROOT, ROOT
+- ANAROOT, ROOT (v6)
 
 ```
 git clone --recursive https://github.com/kondo2024/sm_online_utils.git
@@ -19,7 +19,7 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 ```
 
 ## How to use
-### converters
+### smconverter
 1. Add include path of lib/smconverterlib and load
    lib/smconverter/libsmconverter.so in rootlogon.C.
 2. ROOT[0] .L OnlineMonitor.cc+g
@@ -31,27 +31,21 @@ click the canvas and press any key, then analysis is paused and
 several keyboard commands will be available. Ctrl+c stops 
 OnlineMonitor.
 
-## Filter
-This extracts and saves detector data which coincide with the SAMURAI
-timestamp. NPTOOL is required for complation for PFAD
-filter. $NPTOOL_HOME have to be defined.
-
-### Onlinemonitor
-```
-onlinemonitor
-```
-(for using THttpServer)
-
-```
-onlinemonitor xxxx.ridf
-```
-(for analysis of ridf file with TCanvas display, similar to old version)
-
-## macros
+### macros
 sample root macros.
 
-## prev/sXXX/
+### Onlinemonitor
+see [README](http://github.com/kondo2024/oninemonitor) of onlinemonitor.
+
+### DC Efficiency plotter
+see [README](http://github.com/kondo2024/dceffplot) of dceffplot. 
+
+### prev/sXXX/
 Old codes used in the previous experiments.
+
+### Filter
+Under development, old files are stored in prev/filters directory.
+
 
 - - -
 ## Notes for developers
