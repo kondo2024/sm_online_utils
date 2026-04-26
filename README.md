@@ -25,20 +25,20 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 source install/bin/setup_smconverter.sh
 ```
 ```
-$ smts_converter RunNum
+smts_converter RunNum
 ```
 
 ### macros
 sample root macros.
 
-### Onlinemonitor
+### onlinemonitor
 see [README](http://github.com/kondo2024/onlinemonitor) of onlinemonitor.
 
-### DC Efficiency plotter
+### dceffplot: DC Efficiency plotter
 see [README](http://github.com/kondo2024/dceffplot) of dceffplot. 
 
 ### prev/sXXX/
-Old codes used in the previous experiments.
+Old codes used in previous experiments.
 
 ### Filter
 Under development, old files are stored in prev/filters directory.
@@ -62,7 +62,7 @@ main class of the converter. After registration of the data
 processors, Run() should be called. Then, preparation of tree/histograms
 and event loop will happens. The class is called in main functions, such as smconverters/apps/smts_converter.cc. 
 
-### filter
+### Directories
 Directory structure is like this. 
 
 ```
