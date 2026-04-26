@@ -38,7 +38,7 @@ public:
 protected:
   TArtCalibCATANA* fCalibCATANA;
 
-  char* fdbFileName;
+  TString fdbFileName;
 
   // histograms
   TH1* fhidAraw;

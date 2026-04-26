@@ -8,7 +8,7 @@
 void PPACDataProcessor::PrepareCalib()
 {
   TArtBigRIPSParameters *brprm = TArtBigRIPSParameters::Instance();
-  brprm->LoadParameter(fdbFileName);
+  brprm->LoadParameter((char*)fdbFileName.Data());
 
   fCalibPPAC = new TArtCalibPPAC;
   //fCalibFocalPlane = new TArtCalibFocalPlane;

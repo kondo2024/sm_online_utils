@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_INSTALL_BINDIR "bin")
 set(CMAKE_INSTALL_LIBDIR "lib")
 
+option(BUILD_SMCONVERTER   "Build smconverter"   ON)
+option(BUILD_DCEFFPLOT     "Build dceffplot"     ON)
+option(BUILD_ONLINEMONITOR "Build onlinemonitor" ON)
+
 project(sm_online_utils)
 
 # default install path
@@ -27,7 +31,16 @@ include_directories(
 
 install(DIRECTORY macros/ DESTINATION macros/)
 
-add_subdirectory(smconverter)
-add_subdirectory(dceffplot)
-add_subdirectory(onlinemonitor)
+if(BUILD_SMCONVERTER)
+  add_subdirectory(smconverter)
+endif()
+
+if(BUILD_DCEFFPLOT)
+    add_subdirectory(dceffplot)
+endif()
+
+if(BUILD_ONLINEMONITOR)
+    add_subdirectory(onlinemonitor)
+endif()
+
 #add_subdirectory(filter)

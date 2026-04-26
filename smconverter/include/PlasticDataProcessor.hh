@@ -38,7 +38,7 @@ public:
 protected:
   TArtCalibPlastic* fCalibPlastic;
 
-  char* fdbFileName;
+  TString fdbFileName;
 
   // histograms
   TH1* fhidtl;

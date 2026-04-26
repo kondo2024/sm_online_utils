@@ -9,7 +9,7 @@
 void CATANADataProcessor::PrepareCalib()
 {
   TArtCATANAParameters *caprm = TArtCATANAParameters::Instance();
-  caprm->LoadParameter(fdbFileName);
+  caprm->LoadParameter((char*)fdbFileName.Data());
 
   fCalibCATANA = new TArtCalibCATANA;
   fCalibReady = true;

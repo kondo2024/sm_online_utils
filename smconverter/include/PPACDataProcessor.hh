@@ -40,7 +40,7 @@ protected:
   TArtCalibPPAC* fCalibPPAC;
   // TArtCalibFocalPlane* fCalibFocalPlane;
 
-  char* fdbFileName;
+  TString fdbFileName;
 
   // histograms
   // TH1* fhidtl;
