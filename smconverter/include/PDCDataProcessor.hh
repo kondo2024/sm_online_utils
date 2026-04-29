@@ -20,20 +20,11 @@ public:
   }
   ~PDCDataProcessor(){;}
 
-  PDCDataProcessor(const char* inputtdcdistfilename)
-    : SAMURAIDataProcessor(), fDoTracking(true)
-  {
-    fBranchName = "PDC";
-    fdbFileName = "db/SAMURAIPDC.xml";
-    fTDCDistFileName = inputtdcdistfilename;
-  }
- 
-  PDCDataProcessor(const char* inputdbfilename, const char* inputtdcdistfilename)
+  PDCDataProcessor(const char* inputdbfilename)
     : SAMURAIDataProcessor(), fDoTracking(true)
   {
     fBranchName = "PDC";
     fdbFileName = inputdbfilename;
-    fTDCDistFileName = inputtdcdistfilename;
   }
 
   virtual void PrepareCalib();
@@ -44,14 +35,12 @@ public:
   virtual void FillHistograms();
 
   void SetdbFileName(const char* setdbfilename){fdbFileName = setdbfilename;}
-  void SetTDCDistFile(const char* setfilename){fTDCDistFileName = setfilename;} 
   void DoTracking(bool tf=true){fDoTracking = tf;}
   
 protected:
   TArtCalibPDCHit*   fCalibPDCHit;
   TArtCalibPDCTrack* fCalibPDCTrack;
 
-  const char* fTDCDistFileName;
   const char* fdbFileName;
   Bool_t fDoTracking;
   

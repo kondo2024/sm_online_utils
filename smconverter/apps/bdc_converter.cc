@@ -9,28 +9,22 @@ using namespace std;
 
 int main(int argc, char **argv){
 
-  if (argc<2){
-    std::cout<<"usage: bdc_converter RunNum"
-             <<std::endl;
-    return 0;
+  if (argc < 4){
+    std::cout << "Usage: bdc_converter input.ridf output.root tdcspectrum.root" << std::endl;
+    return 1;
   }
 
-  Int_t nRun = atoi(argv[1]);
-
-  TString fname_ridf(Form("ridf/sdaq04/data%04d.ridf.gz",nRun));
-  TString fname_out(Form("rootfiles/dc/bdc_%04d.root",nRun));
+  TString fname_ridf = argv[1];
+  TString fname_out  = argv[2];
+  TString fname_tdc  = argv[3];
 
   SAMURAIDataConverter converter;
-  //converter.SetMaxEventNumber(100);// temp for check
-
   converter.SetRIDFFileName(fname_ridf.Data());
   converter.SetOutputFileName(fname_out.Data());
 
   converter.SetOutputTreeName("t_BDC");
 
-  const char *TDCdist = "rootfiles/dctdc/run0309_tdcSpectrum.root";
-
-  BDCDataProcessor bdc(TDCdist);
+  BDCDataProcessor bdc(fname_tdc.Data());
   bdc.MakeTreeBranches(true);
   bdc.MakeHistograms(true);
   converter.RegisterDataProcessor(&bdc);
