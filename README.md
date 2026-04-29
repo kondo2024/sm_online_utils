@@ -25,7 +25,14 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 source install/bin/setup_smconverter.sh
 ```
 ```
-smts_converter RunNum
+smts_converter xxxxx.ridf yyyyy.root
+```
+```
+smts_converter xxxxx.ridf yyyyy.root
+```
+In case of drift chamber, a root file containing tdc spectra should be prepared in advance by macros/make_dctdcdists_multi.cc. The converter should run like this.
+```
+bdc_converter xxxxx.ridf yyyyy.root tdcspectrum.root
 ```
 
 ### macros

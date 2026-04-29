@@ -1,8 +1,9 @@
 /*
   macro for making TDC distribution of each layer of BDC1,2,FDC1,2
+  take first hit for tdc distribution.
   How to use
-  ROOT[] .L sm_online_utils/s057/make_dctdcdists.cc+g
-  ROOT[] make_dctdcdists(101) (101 is run number)
+  ROOT[] .L sm_online_utils/macros/make_dctdcdists_multi.cc+g
+  ROOT[] make_dctdcdists_multi(101) (101 is run number)
 
   NOTE: check and modify the histogram range
  */
@@ -103,13 +104,11 @@ void make_dctdcdists_multi(Int_t nRun=12){
       cout<<"\r event = "<<neve<<" / "<<neve_max<<flush;
 
     //-----------------------------
-    // BDC1,2
+    // BDC1
     calib_bdc1hit->ClearData();
     calib_bdc1hit->ReconstructData();
-    calib_bdc2hit->ClearData();
-    calib_bdc2hit->ReconstructData();
 
-    TArtDCHit* hit1[8] = {nullptr};
+    TArtDCHit* hit_b1[8] = {nullptr};
     
     Int_t nbdc1hit = bdc1hits->GetEntries();
     for(int i=0;i<nbdc1hit;++i){
@@ -117,23 +116,20 @@ void make_dctdcdists_multi(Int_t nRun=12){
       Int_t id = hit->GetID();
       Int_t tdc = hit->GetTDC();
       Int_t layer = hit->GetLayer();
-      //hbdc1id->Fill(id);
-      //hbdc1idtdc->Fill(id, tdc);
-      //hbdc1tdc[layer]->Fill(tdc);
 
       // store minimum TDC hit
-      if (!hit1[layer]){
-	hit1[layer] = hit; 
+      if (!hit_b1[layer]){
+	hit_b1[layer] = hit; 
       }else{
-	TArtDCHit *hit0 = hit1[layer];
+	TArtDCHit *hit0 = hit_b1[layer];
 	if (hit->GetTDC() < hit0->GetTDC())
-	  hit1[layer] = hit;
+	  hit_b1[layer] = hit;
       }
     }
 
     for (int i=0;i<8;++i){
-      if (hit1[i]){
-	TArtDCHit* hit = hit1[i];
+      if (hit_b1[i]){
+	TArtDCHit* hit = hit_b1[i];
 	Int_t id = hit->GetID();
 	Int_t tdc = hit->GetTDC();
 	hbdc1id->Fill(id);
@@ -142,8 +138,11 @@ void make_dctdcdists_multi(Int_t nRun=12){
       }
     }
 
-
-    TArtDCHit* hit2[8] = {nullptr};
+    //-----------------------------
+    // BDC2
+    calib_bdc2hit->ClearData();
+    calib_bdc2hit->ReconstructData();
+    TArtDCHit* hit_b2[8] = {nullptr};
     
     Int_t nbdc2hit = bdc2hits->GetEntries();
     for(int i=0;i<nbdc2hit;++i){
@@ -151,24 +150,21 @@ void make_dctdcdists_multi(Int_t nRun=12){
       Int_t id = hit->GetID();
       Int_t tdc = hit->GetTDC();
       Int_t layer = hit->GetLayer();
-      //hbdc2id->Fill(id);
-      //hbdc2idtdc->Fill(id, tdc);
-      //hbdc2tdc[layer]->Fill(tdc);
 
       // store minimum TDC hit
-      if (!hit2[layer]){
-	hit2[layer] = hit; 
+      if (!hit_b2[layer]){
+	hit_b2[layer] = hit; 
       }else{
-	TArtDCHit *hit0 = hit2[layer];
+	TArtDCHit *hit0 = hit_b2[layer];
 	if (hit->GetTDC() < hit0->GetTDC())
-	  hit2[layer] = hit;
+	  hit_b2[layer] = hit;
       }
 
     }
 
     for (int i=0;i<8;++i){
-      if (hit2[i]){
-	TArtDCHit* hit = hit2[i];
+      if (hit_b2[i]){
+	TArtDCHit* hit = hit_b2[i];
 	Int_t id = hit->GetID();
 	Int_t tdc = hit->GetTDC();
 	hbdc2id->Fill(id);
@@ -178,36 +174,76 @@ void make_dctdcdists_multi(Int_t nRun=12){
     }
 
     //-----------------------------
-    // FDC1,2
+    // FDC1
     calib_fdc1hit->ClearData();
     calib_fdc1hit->ReconstructData();
-    calib_fdc2hit->ClearData();
-    calib_fdc2hit->ReconstructData();
 
+    TArtDCHit* hit_f1[14] = {nullptr};
+    
     Int_t nfdc1hit = fdc1hits->GetEntries();
     for(int i=0;i<nfdc1hit;++i){
       TArtDCHit *hit = (TArtDCHit*)fdc1hits->At(i);
       Int_t id = hit->GetID();
       Int_t tdc = hit->GetTDC();
       Int_t layer = hit->GetLayer();
-      hfdc1id->Fill(id);
-      hfdc1idtdc->Fill(id, hit->GetTDC());
-      hfdc1tdc[layer]->Fill(tdc);      
 
-
+      // store minimum TDC hit
+      if (!hit_f1[layer]){
+	hit_f1[layer] = hit; 
+      }else{
+	TArtDCHit *hit0 = hit_f1[layer];
+	if (hit->GetTDC() < hit0->GetTDC())
+	  hit_f1[layer] = hit;
+      }
+      
+    }
+    for (int i=0;i<14;++i){
+      if (hit_f1[i]){
+	TArtDCHit* hit = hit_f1[i];
+	Int_t id = hit->GetID();
+	Int_t tdc = hit->GetTDC();
+	hfdc1id->Fill(id);
+	hfdc1idtdc->Fill(id,tdc);
+	hfdc1tdc[i]->Fill(tdc);	
+      }
     }
 
+    //-----------------------------
+    // FDC2
+    calib_fdc2hit->ClearData();
+    calib_fdc2hit->ReconstructData();
+
+    TArtDCHit* hit_f2[14] = {nullptr};
+    
     Int_t nfdc2hit = fdc2hits->GetEntries();
     for(int i=0;i<nfdc2hit;++i){
       TArtDCHit *hit = (TArtDCHit*)fdc2hits->At(i);
       Int_t id = hit->GetID();
       Int_t tdc = hit->GetTDC();
       Int_t layer = hit->GetLayer();
-      hfdc2id->Fill(id);
-      hfdc2idtdc->Fill(id, hit->GetTDC());
-      hfdc2tdc[layer]->Fill(tdc);      
-    }
 
+      // store minimum TDC hit
+      if (!hit_f2[layer]){
+	hit_f2[layer] = hit; 
+      }else{
+	TArtDCHit *hit0 = hit_f2[layer];
+	if (hit->GetTDC() < hit0->GetTDC())
+	  hit_f2[layer] = hit;
+      }
+
+    }
+    for (int i=0;i<14;++i){
+      if (hit_f2[i]){
+	TArtDCHit* hit = hit_f2[i];
+	Int_t id = hit->GetID();
+	Int_t tdc = hit->GetTDC();
+	hfdc2id->Fill(id);
+	hfdc2idtdc->Fill(id,tdc);
+	hfdc2tdc[i]->Fill(tdc);	
+      }
+    }
+    //-----------------------------
+    
     estore->ClearData();
     neve++;
   }
