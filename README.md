@@ -26,6 +26,7 @@ cmake -DCMAKE_INSTALL_PREFIX=../install ../
 ```
 source install/bin/setup_smconverter.sh
 ```
+2. run converter like this.
 ```
 smts_converter xxxxx.ridf yyyyy.root
 ```
