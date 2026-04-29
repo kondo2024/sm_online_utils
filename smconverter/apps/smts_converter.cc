@@ -1,22 +1,20 @@
 #include "SAMURAIDataConverter.hh"
 #include "SAMURAITSDataProcessor.hh"
 #include <iostream>
+#include <TString.h>
 
 using namespace std;
 
 int main(int argc, char **argv){
 
-  if (argc<2){
-    //std::cout<<"usage: nebula_converter ridffile outputfile"
-    std::cout<<"usage: smts_converter RunNum"
-             <<std::endl;
-    return 0;
+  if (argc < 3){
+    std::cout << "Usage: smts_converter [input_ridf] [output_root]" << std::endl;
+    std::cout << "Example: ./smts_converter data/run0123.ridf.gz rootfiles/output.root" << std::endl;
+    return 1;
   }
 
-  Int_t nRun = atoi(argv[1]);
-
-  TString fname_ridf(Form("ridf/sdaq04/data%04d.ridf.gz",nRun));
-  TString fname_out(Form("rootfiles/ts/smts%04d.root",nRun));
+  TString fname_ridf = argv[1];
+  TString fname_out  = argv[2];
 
   SAMURAIDataConverter converter;
   converter.SetRIDFFileName(fname_ridf.Data());
