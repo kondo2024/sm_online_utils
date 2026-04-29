@@ -20,6 +20,9 @@ cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../
 ```
 
+If you forgot "--recursive" during clone, run:
+`git submodule update --init --recursive`
+
 ## How to use
 ### smconverter
 1. set PATH and LD_LIBRARY_PATH for smconverter.so
@@ -32,19 +35,19 @@ smts_converter xxxxx.ridf yyyyy.root
 ```
 In case of drift chambers, a root file containing tdc spectra should be prepared for space-time conversion. It can be made by macros/make_dctdcdists_multi.cc. A converter should run like this.
 ```
-bdc_converter xxxxx.ridf yyyyy.root tdcspectrum.root
+bdc_converter xxxxx.ridf yyyyy.root tdcspectrum_runZZZZ.root
 ```
 
 currently these converters are availble
 - smts_converter: converter for SAMURAI Timestamp
-- plastic_converter: cointains coincidence reg., beamline plastics, HOD, NEBULA
+- plastic_converter: contains coincidence reg., beamline plastics, HOD, NEBULA
 - bdc_converter: contains BDC1 and BDC2
 - fdc1_converter
 - fdc2_converter
 - ninja_converter
 
 ### macros
-sample root macros.
+sample root macros. See top lines of the file to see how to use it.
 
 ### onlinemonitor
 see [README](http://github.com/kondo2024/onlinemonitor) of onlinemonitor.
@@ -71,7 +74,7 @@ histograms. All the processors have to inherit
 SAMURAIDataProcessor. In case of drift chambers TDC distributions are
 also loaded for drift time -> drift length calibration.
 
-##### SAMURAIDataConveter
+##### SAMURAIDataConverter
 main class of the converter. After registration of the data
 processors, Run() should be called. Then, preparation of tree/histograms
 and event loop will happens. The class is called in main functions, such as smconverters/apps/smts_converter.cc. 
@@ -99,7 +102,7 @@ sm_online_utils
 ├── dceffplot
 ├── onlinemonitor
 └── prev
-    ├── s0XX (old packaged used in previous exps)
+    ├── s0XX (old packages used in previous exps)
     └── ...
 ```
 
