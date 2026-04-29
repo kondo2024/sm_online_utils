@@ -62,9 +62,8 @@ Under development, old files are stored in prev/filters directory.
 - - -
 ## Notes for developers
 
-### converter
+### smconverter
 This converts the RIDF data to root tree and/or historgrams.
- 
 
 ##### XXXXDataProcessor
 Load parameter file XXXX.xml,call TArtCalibXXXX,prepare tree,
