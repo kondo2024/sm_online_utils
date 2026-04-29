@@ -10,7 +10,7 @@ Requirements
 - ANAROOT, ROOT (v6)
 
 1. set TARTSYS
-2.
+2. compile
 ```
 git clone --recursive https://github.com/kondo2024/sm_online_utils.git
 cd sm_online_utils
@@ -34,6 +34,14 @@ In case of drift chamber, a root file containing tdc spectra should be prepared 
 ```
 bdc_converter xxxxx.ridf yyyyy.root tdcspectrum.root
 ```
+
+currently these converters are availble
+- smts_converter: converter for SAMURAI Timestamp
+- plastic_converter: cointains coincidence reg., beamline plastics, HOD, NEBULA
+- bdc_converter: contains BDC1 and BDC2
+- fdc1_converter
+- fdc2_converter
+- ninja_converter
 
 ### macros
 sample root macros.
