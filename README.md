@@ -18,6 +18,7 @@ mkdir build
 mkdir install
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=../install ../
+make install -j10
 ```
 
 If you forgot "--recursive" during clone, run:
