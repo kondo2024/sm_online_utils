@@ -110,10 +110,8 @@ void BDCDataProcessor::ReconstructData()
     Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
     //std::cout << BDC1NumberOfTracks << std::endl;
     if(BDC1NumberOfTracks > 0) {
-      TArtDCTrack *TrackBDC1;
-      
       for(Int_t i = 0; i<BDC1NumberOfTracks; i++) {
-        TrackBDC1 = (TArtDCTrack *)BDC1Tracks->At(i);
+        TArtDCTrack *TrackBDC1 = (TArtDCTrack *)BDC1Tracks->At(i);
         
 	if(TrackBDC1) {
 
@@ -149,10 +147,9 @@ void BDCDataProcessor::ReconstructData()
     Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
 
     if(BDC2NumberOfTracks > 0) {
-      TArtDCTrack *TrackBDC2;
       
       for(Int_t i = 0; i<BDC2NumberOfTracks; i++) {
-        TrackBDC2 = (TArtDCTrack *)BDC2Tracks->At(i);
+        TArtDCTrack *TrackBDC2 = (TArtDCTrack *)BDC2Tracks->At(i);
         
 	if(TrackBDC2) {
 

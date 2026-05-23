@@ -49,7 +49,8 @@ void SAMURAIDataConverter::PrepareTreeBranches()
 {
   fOutputFile->cd();
   fTree = new TTree(fTreeName.Data(),"");
-
+  fTree->SetAutoFlush(-50*1024*1024); // 50 MB
+  
   int n = fProcessorList.size();
 
   if (n==0) std::cout<<"SAMURAIDataConverter: no processor is registered"<<std::endl;

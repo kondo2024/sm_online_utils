@@ -29,7 +29,11 @@ void FDC2DataProcessor::PrepareTreeBranches(TTree *tree)
 
   TClonesArray *fdc2track_array = fCalibFDC2Track->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &fdc2track_array);
+  //fTree->Branch(fBranchName.Data(), &fdc2track_array);
+  fTree->Branch("FDC2X", &fFDC2_X);
+  fTree->Branch("FDC2Y", &fFDC2_Y);
+  fTree->Branch("FDC2A", &fFDC2_A);
+  fTree->Branch("FDC2B", &fFDC2_B);
 }
 //____________________________________________________________________
 void FDC2DataProcessor::PrepareHistograms()
