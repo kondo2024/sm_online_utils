@@ -86,6 +86,10 @@ protected:
   TArtCalibBDC1Track* fCalibBDC1Track;
   TArtCalibBDC2Track* fCalibBDC2Track;
   TArtDCTrack*        fTargetTrack;
+  Double_t            fTarget_X;
+  Double_t            fTarget_Y;
+  Double_t            fTarget_A;
+  Double_t            fTarget_B;
 
   const char* fTDCDistFileName;
   const char* fdbfilename1;

@@ -40,7 +40,11 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
   fTree = tree;
   fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
   fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
-  fTree->Branch("Target", &fTargetTrack);
+  //fTree->Branch("Target", &fTargetTrack);
+  fTree->Branch("TargetX", &fTarget_X);
+  fTree->Branch("TargetY", &fTarget_Y);
+  fTree->Branch("TargetA", &fTarget_A);
+  fTree->Branch("TargetB", &fTarget_B);
 }
 //____________________________________________________________________
 void BDCDataProcessor::PrepareHistograms()
@@ -82,6 +86,8 @@ void BDCDataProcessor::ClearData()
 
   fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
   fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
+  fTarget_X = -9999.; fTarget_Y = -9999.;
+  fTarget_A = -9999.; fTarget_B = -9999.;
 }
 //____________________________________________________________________
 void BDCDataProcessor::ReconstructData()
@@ -216,6 +222,11 @@ void BDCDataProcessor::FillHistograms()
     fTargetTrack->SetAngle(TMath::ATan(beamDirection.X()/beamDirection.Z())*1000.,0);// mrad
     fTargetTrack->SetAngle(TMath::ATan(beamDirection.Y()/beamDirection.Z())*1000.,1);
 
+    fTarget_X = targetPosition.X();
+    fTarget_Y = targetPosition.Y();
+    fTarget_A = TMath::ATan(beamDirection.X()/beamDirection.Z());// rad
+    fTarget_B = TMath::ATan(beamDirection.Y()/beamDirection.Z());// rad
+    
     fhxy_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetPosition(1));
     fhx_tgt->Fill(fTargetTrack->GetPosition(0));
     fhy_tgt->Fill(fTargetTrack->GetPosition(1));
