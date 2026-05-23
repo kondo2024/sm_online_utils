@@ -6,7 +6,7 @@ add_library(smconverter SHARED ${LIB_SOURCES})
 target_link_libraries(smconverter
     ${ROOT_LIBRARIES}
     XMLParser
-    -L${ANAROOT_LIB_DIR} anacore anasamurai anacatana
+    -L${ANAROOT_LIB_DIR} anacore anabrips anasamurai anacatana
 )
 
 file(GLOB APP_SOURCES "apps/*.cc")

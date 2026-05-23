@@ -1,5 +1,4 @@
 #include "SAMURAIDataConverter.hh"
-
 #include <iostream>
 //____________________________________________________________________
 SAMURAIDataConverter::SAMURAIDataConverter()
@@ -99,7 +98,6 @@ void SAMURAIDataConverter::EventLoop()
       SAMURAIDataProcessor *p = fProcessorList[ip];
       if (p->DoesMakeHistograms()) p->FillHistograms();
     }
-
     fEventStore->ClearData();
     neve ++;
   }//while(estore->GetNextEvent()){

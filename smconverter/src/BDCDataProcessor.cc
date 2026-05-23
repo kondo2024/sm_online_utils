@@ -10,6 +10,10 @@
 //____________________________________________________________________
 void BDCDataProcessor::PrepareCalib()
 {
+  if (fCalibReady) return;
+
+  std::cout<<"PrepareCalib"<<std::endl;
+  
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
   smprm->LoadParameter(fdbfilename1);
   smprm->LoadParameter(fdbfilename2);
@@ -18,7 +22,7 @@ void BDCDataProcessor::PrepareCalib()
   fCalibBDC2Hit = new TArtCalibBDC2Hit;
   fCalibBDC1Track = new TArtCalibBDC1Track;
   fCalibBDC2Track = new TArtCalibBDC2Track;
-  fTargetTrack = new TArtDCTrack;
+  //  fTargetTrack = new TArtDCTrack;
 
   fCalibBDC1Track->SetTDCWindow(0,3000);
   fCalibBDC2Track->SetTDCWindow(0,3000);
@@ -35,22 +39,26 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
 {
   if (!fCalibReady) PrepareCalib();
 
+  std::cout<<"PrepareTreeBranch"<<std::endl;
+
+  fTree = tree;
   TClonesArray *bdc1track_array = fCalibBDC1Track->GetDCTrackArray();
   TClonesArray *bdc2track_array = fCalibBDC2Track->GetDCTrackArray();
-  fTree = tree;
-  fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
-  fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
-  fTree->Branch("Target", &fTargetTrack);
-  fTree->Branch("TargetX", &fTarget_X, "TargetX/D");
-  fTree->Branch("TargetY", &fTarget_Y, "TargetY/D");
-  fTree->Branch("TargetA", &fTarget_A, "TargetA/D");
-  fTree->Branch("TargetB", &fTarget_B, "TargetB/D");
+  //fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
+  //fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
+  //  fTree->Branch("Target", &fTargetTrack);
+  tree->Branch("TargetX", &fTarget_X, "TargetX/D");
+  tree->Branch("TargetY", &fTarget_Y, "TargetY/D");
+  tree->Branch("TargetA", &fTarget_A, "TargetA/D");
+  tree->Branch("TargetB", &fTarget_B, "TargetB/D");
 }
 //____________________________________________________________________
 void BDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
+  std::cout<<"PrepareHistograms"<<std::endl;
+  
   fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,5000);
   fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,5000);
   fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-50,50, 100,-50,50);
@@ -74,15 +82,18 @@ void BDCDataProcessor::PrepareHistograms()
 //____________________________________________________________________
 void BDCDataProcessor::ClearData()
 {
+  //std::cout<<"ClearData"<<std::endl;
+  
   fCalibBDC1Hit->ClearData();
   fCalibBDC2Hit->ClearData();
   fCalibBDC1Track->ClearData();
   fCalibBDC2Track->ClearData();
 
-  fTargetTrack->SetPosition(0,-9999);
-  fTargetTrack->SetPosition(1,-9999);
-  fTargetTrack->SetAngle(0,-9999);
-  fTargetTrack->SetAngle(1,-9999);
+//  fTargetTrack->Clear();
+//  fTargetTrack->SetPosition(0,-9999);
+//  fTargetTrack->SetPosition(1,-9999);
+//  fTargetTrack->SetAngle(0,-9999);
+//  fTargetTrack->SetAngle(1,-9999);
 
   fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
   fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
@@ -92,6 +103,8 @@ void BDCDataProcessor::ClearData()
 //____________________________________________________________________
 void BDCDataProcessor::ReconstructData()
 {
+  //std::cout<<"ReconstructData"<<std::endl;
+
   fCalibBDC1Hit->ReconstructData();
   fCalibBDC2Hit->ReconstructData();
   if (fDoTracking){
@@ -207,7 +220,8 @@ void BDCDataProcessor::ReconstructData()
 //____________________________________________________________________
 void BDCDataProcessor::FillHistograms()
 {  
-
+  //std::cout<<"FillHistograms"<<std::endl;
+  
   // BDC1 Hit
   TClonesArray *hit_array = fCalibBDC1Hit->GetDCHitArray();
   int n=hit_array->GetEntries();
@@ -228,9 +242,10 @@ void BDCDataProcessor::FillHistograms()
     fhidt_bdc2->Fill(id,traw);
   }
 
-  if (!fDoTracking) return;
+  //if (!fDoTracking) return;
   fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
-  fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
+  fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);
+
   
   if(abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
     fhxy_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetPosition(1));
@@ -245,18 +260,19 @@ void BDCDataProcessor::FillHistograms()
 //____________________________________________________________________
 
 void BDCDataProcessor::LoadDCTDCDistribution() {
-
+  std::cout<<"LoadDCTDCDist"<<std::endl;
+  
   TDirectory *pwd = gDirectory;
 
-  TFile *RootFile = new TFile(fTDCDistFileName,"READ");
+  TFile RootFile(fTDCDistFileName,"READ");
 
-  if(RootFile->IsOpen()) {
+  if(RootFile.IsOpen()) {
     gROOT->cd();
     TH1D *Hist1D = NULL;
     Int_t BDCNumberOfLayers = 8;
 
     for(Int_t i=0; i<BDCNumberOfLayers; i++) {
-      Hist1D = (TH1D*) RootFile->Get(Form("hbdc1tdc%d",i));
+      Hist1D = (TH1D*) RootFile.Get(Form("hbdc1tdc%d",i));
 
       if(Hist1D) {
 	fCalibBDC1Track->SetTDCDistribution(Hist1D,i);
@@ -268,7 +284,7 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
     }
 
     for(Int_t i=0; i<BDCNumberOfLayers; i++) {
-      Hist1D = (TH1D*) RootFile->Get(Form("hbdc2tdc%d",i));
+      Hist1D = (TH1D*) RootFile.Get(Form("hbdc2tdc%d",i));
 
       if(Hist1D) {
 	fCalibBDC2Track->SetTDCDistribution(Hist1D,i);
@@ -278,6 +294,7 @@ void BDCDataProcessor::LoadDCTDCDistribution() {
       else
       std::cout << "\e[35m " << "Warning LoadTDCDistribution :: Could not find the following histogram " << Form("hbdc2tdc%d",i) << "\e[0m" << std::endl;
     }
+    RootFile.Close();
   }else{
     fDoTracking = false;
     std::cout << "\e[35m " << "Skip BDC tracking " << "\e[0m" << std::endl;    
