@@ -51,7 +51,8 @@ public:
 protected:
   TArtCalibFDC1Hit*   fCalibFDC1Hit;
   TArtCalibFDC1Track* fCalibFDC1Track;
-
+  Double_t fFDC1_X, fFDC1_Y, fFDC1_A, fFDC1_B;
+  
   const char* fTDCDistFileName;
   const char* fdbFileName;
   Bool_t fDoTracking;
@@ -59,9 +60,6 @@ protected:
   // histograms
   TH1* fhidt_fdc1;
   TH1* fhxy_fdc1;
-
-  //Variables
-  Double_t fFDC1_X, fFDC1_Y, fFDC1_ThetaX, fFDC1_ThetaY;
 
 };
 

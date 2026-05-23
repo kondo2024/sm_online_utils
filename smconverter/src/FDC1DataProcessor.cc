@@ -29,7 +29,11 @@ void FDC1DataProcessor::PrepareTreeBranches(TTree *tree)
 
   TClonesArray *fdc1track_array = fCalibFDC1Track->GetDCTrackArray();
   fTree = tree;
-  fTree->Branch(fBranchName.Data(), &fdc1track_array);
+  //fTree->Branch(fBranchName.Data(), &fdc1track_array);
+  fTree->Branch("FDC1X",&fFDC1_X);
+  fTree->Branch("FDC1Y",&fFDC1_Y);
+  fTree->Branch("FDC1A",&fFDC1_A);
+  fTree->Branch("FDC1B",&fFDC1_B);
 }
 //____________________________________________________________________
 void FDC1DataProcessor::PrepareHistograms()
@@ -48,14 +52,65 @@ void FDC1DataProcessor::ClearData()
 {
   fCalibFDC1Hit->ClearData();
   fCalibFDC1Track->ClearData();
+  fFDC1_X=-9999.;
+  fFDC1_Y=-9999.;
+  fFDC1_A=-9999.;
+  fFDC1_B=-9999.;
 }
 //____________________________________________________________________
 void FDC1DataProcessor::ReconstructData()
 {
   fCalibFDC1Hit->ReconstructData();
-  if (fDoTracking){
-    fCalibFDC1Track->ReconstructData();
+
+  if (!fDoTracking) return;
+  fCalibFDC1Track->ReconstructData();
+
+  // FDC1 Track
+  TClonesArray *FDC1Tracks = fCalibFDC1Track->GetDCTrackArray();
+
+  if (FDC1Tracks) {
+    Int_t FDC1NumberOfTracks = FDC1Tracks->GetEntries();
+    //Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
+
+    if(FDC1NumberOfTracks > 0) {
+
+      TArtDCTrack *TrackFDC1 = (TArtDCTrack *)FDC1Tracks->At(0);
+      fFDC1_X = TrackFDC1->GetPosition(0);
+      fFDC1_A = TMath::ATan(TrackFDC1->GetAngle(0));
+      fFDC1_Y = TrackFDC1->GetPosition(1);
+      fFDC1_B = TMath::ATan(TrackFDC1->GetAngle(1));
+      
+
+//      TArtDCTrack *TrackFDC1;
+//      for(Int_t i = 0; i<FDC1NumberOfTracks; i++) {
+//        TrackFDC1 = (TArtDCTrack *)FDC1Tracks->At(i);
+//        
+//	if(TrackFDC1) {
+//
+//	  TempXPosition = TrackFDC1->GetPosition(0);
+//  	  TempYPosition = TrackFDC1->GetPosition(1);
+//	  TempChi2 = TrackFDC1->GetChi2() / (Double_t)TrackFDC1->GetNDF();
+//
+//	  if(TempChi2 > 0) {
+//	  
+//	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+//	      fFDC1_X = TempXPosition;
+//  	      fFDC1_A = TMath::ATan(TrackFDC1->GetAngle(0));
+//	      MinChi2x = TempChi2;
+//	    }	      
+//
+//	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+//	      fFDC1_Y = TempYPosition;
+//  	      fFDC1_B = TMath::ATan(TrackFDC1->GetAngle(1));
+//	      MinChi2y = TempChi2;
+//	    }	      
+//	  }
+//	}
+//      }
+    }
   }
+
+  
 }
 //____________________________________________________________________
 void FDC1DataProcessor::FillHistograms()
@@ -72,47 +127,7 @@ void FDC1DataProcessor::FillHistograms()
   }
 
   if (!fDoTracking) return;
-
-  // FDC1 Track
-  TClonesArray *FDC1Tracks = fCalibFDC1Track->GetDCTrackArray();
-
-  if (FDC1Tracks) {
-    Int_t FDC1NumberOfTracks = FDC1Tracks->GetEntries();
-    Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
-
-    if(FDC1NumberOfTracks > 0) {
-      TArtDCTrack *TrackFDC1;
-      
-      for(Int_t i = 0; i<FDC1NumberOfTracks; i++) {
-        TrackFDC1 = (TArtDCTrack *)FDC1Tracks->At(i);
-        
-	if(TrackFDC1) {
-
-	  TempXPosition = TrackFDC1->GetPosition(0);
-  	  TempYPosition = TrackFDC1->GetPosition(1);
-	  TempChi2 = TrackFDC1->GetChi2() / (Double_t)TrackFDC1->GetNDF();
-
-	  if(TempChi2 > 0) {
-	  
-	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
-	      fFDC1_X = TempXPosition;
-  	      fFDC1_ThetaX = TMath::ATan(TrackFDC1->GetAngle(0));
-	      MinChi2x = TempChi2;
-	    }	      
-
-	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
-	      fFDC1_Y = TempYPosition;
-  	      fFDC1_ThetaY = TMath::ATan(TrackFDC1->GetAngle(1));
-	      MinChi2y = TempChi2;
-	    }	      
-	  }
-	}
-      }
-
-      fhxy_fdc1->Fill(fFDC1_X,fFDC1_Y);  
-    }      
-  }
-
+  fhxy_fdc1->Fill(fFDC1_X,fFDC1_Y);  
 
 }
 //____________________________________________________________________

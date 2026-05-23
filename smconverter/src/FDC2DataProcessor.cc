@@ -48,14 +48,68 @@ void FDC2DataProcessor::ClearData()
 {
   fCalibFDC2Hit->ClearData();
   fCalibFDC2Track->ClearData();
+  fFDC2_X = -9999;
+  fFDC2_Y = -9999;
+  fFDC2_A = -9999;
+  fFDC2_B = -9999;
 }
 //____________________________________________________________________
 void FDC2DataProcessor::ReconstructData()
 {
   fCalibFDC2Hit->ReconstructData();
-  if (fDoTracking){
-    fCalibFDC2Track->ReconstructData();
+
+  if (!fDoTracking) return;
+  fCalibFDC2Track->ReconstructData();
+
+  // FDC2 Track
+  TClonesArray *FDC2Tracks = fCalibFDC2Track->GetDCTrackArray();
+
+  if (FDC2Tracks) {
+    Int_t FDC2NumberOfTracks = FDC2Tracks->GetEntries();
+    //Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
+
+    if(FDC2NumberOfTracks > 0) {
+
+      TArtDCTrack *TrackFDC2 = (TArtDCTrack *)FDC2Tracks->At(0);
+      fFDC2_X = TrackFDC2->GetPosition(0);
+      fFDC2_A = TMath::ATan(TrackFDC2->GetAngle(0));
+      fFDC2_Y = TrackFDC2->GetPosition(1);
+      fFDC2_B = TMath::ATan(TrackFDC2->GetAngle(1));
+      
+//      TArtDCTrack *TrackFDC2;
+//      for(Int_t i = 0; i<FDC2NumberOfTracks; i++) {
+//        TrackFDC2 = (TArtDCTrack *)FDC2Tracks->At(i);
+//        
+//	if(TrackFDC2) {
+//
+//	  TempXPosition = TrackFDC2->GetPosition(0);
+//  	  TempYPosition = TrackFDC2->GetPosition(1);
+//	  TempChi2 = TrackFDC2->GetChi2() / (Double_t)TrackFDC2->GetNDF();
+//
+//	  if(TempChi2 > 0) {
+//	  
+//	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
+//	      fFDC2_X = TempXPosition;
+//  	      fFDC2_A = TMath::ATan(TrackFDC2->GetAngle(0));
+//	      MinChi2x = TempChi2;
+//	    }	      
+//
+//	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
+//	      fFDC2_Y = TempYPosition;
+//  	      fFDC2_B = TMath::ATan(TrackFDC2->GetAngle(1));
+//	      MinChi2y = TempChi2;
+//	    }	      
+//	  }
+//	}
+//
+//
+//    }
+
+    }      
   }
+
+
+  
 }
 //____________________________________________________________________
 void FDC2DataProcessor::FillHistograms()
@@ -72,47 +126,7 @@ void FDC2DataProcessor::FillHistograms()
   }
 
   if (!fDoTracking) return;
-
-  // FDC2 Track
-  TClonesArray *FDC2Tracks = fCalibFDC2Track->GetDCTrackArray();
-
-  if (FDC2Tracks) {
-    Int_t FDC2NumberOfTracks = FDC2Tracks->GetEntries();
-    Double_t TempXPosition, TempYPosition, TempChi2, MinChi2x =1e6, MinChi2y =1e6;
-
-    if(FDC2NumberOfTracks > 0) {
-      TArtDCTrack *TrackFDC2;
-      
-      for(Int_t i = 0; i<FDC2NumberOfTracks; i++) {
-        TrackFDC2 = (TArtDCTrack *)FDC2Tracks->At(i);
-        
-	if(TrackFDC2) {
-
-	  TempXPosition = TrackFDC2->GetPosition(0);
-  	  TempYPosition = TrackFDC2->GetPosition(1);
-	  TempChi2 = TrackFDC2->GetChi2() / (Double_t)TrackFDC2->GetNDF();
-
-	  if(TempChi2 > 0) {
-	  
-	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
-	      fFDC2_X = TempXPosition;
-  	      fFDC2_ThetaX = TMath::ATan(TrackFDC2->GetAngle(0));
-	      MinChi2x = TempChi2;
-	    }	      
-
-	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
-	      fFDC2_Y = TempYPosition;
-  	      fFDC2_ThetaY = TMath::ATan(TrackFDC2->GetAngle(1));
-	      MinChi2y = TempChi2;
-	    }	      
-	  }
-	}
-      }
-
-      fhxy_fdc2->Fill(fFDC2_X,fFDC2_Y);  
-    }      
-  }
-
+  fhxy_fdc2->Fill(fFDC2_X,fFDC2_Y);  
 
 }
 //____________________________________________________________________
