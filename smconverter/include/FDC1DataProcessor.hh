@@ -60,6 +60,8 @@ protected:
   // histograms
   TH1* fhidt_fdc1;
   TH1* fhxy_fdc1;
+  TH1* fhxa_fdc1;
+  TH1* fhyb_fdc1;
 
 };
 
