@@ -40,11 +40,11 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
   fTree = tree;
   fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
   fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
-  //fTree->Branch("Target", &fTargetTrack);
-  fTree->Branch("TargetX", &fTarget_X);
-  fTree->Branch("TargetY", &fTarget_Y);
-  fTree->Branch("TargetA", &fTarget_A);
-  fTree->Branch("TargetB", &fTarget_B);
+  fTree->Branch("Target", &fTargetTrack);
+  fTree->Branch("TargetX", &fTarget_X, "TargetX/D");
+  fTree->Branch("TargetY", &fTarget_Y, "TargetY/D");
+  fTree->Branch("TargetA", &fTarget_A, "TargetA/D");
+  fTree->Branch("TargetB", &fTarget_B, "TargetB/D");
 }
 //____________________________________________________________________
 void BDCDataProcessor::PrepareHistograms()
@@ -98,30 +98,7 @@ void BDCDataProcessor::ReconstructData()
     fCalibBDC1Track->ReconstructData();
     fCalibBDC2Track->ReconstructData();
   }
-}
-//____________________________________________________________________
-void BDCDataProcessor::FillHistograms()
-{  
 
-  // BDC1 Hit
-  TClonesArray *hit_array = fCalibBDC1Hit->GetDCHitArray();
-  int n=hit_array->GetEntries();
-  for (int i=0;i<n;++i){
-    TArtDCHit *hit = (TArtDCHit*)hit_array->At(i);
-    Double_t id = hit->GetID();
-    Double_t traw = hit->GetTDC();
-    fhidt_bdc1->Fill(id,traw);
-  }
-
-  // BDC2 Hit
-  hit_array = fCalibBDC2Hit->GetDCHitArray();
-  n=hit_array->GetEntries();
-  for (int i=0;i<n;++i){
-    TArtDCHit *hit = (TArtDCHit*)hit_array->At(i);
-    Double_t id = hit->GetID();
-    Double_t traw = hit->GetTDC();
-    fhidt_bdc2->Fill(id,traw);
-  }
 
   if (!fDoTracking) return;
 
@@ -161,8 +138,6 @@ void BDCDataProcessor::FillHistograms()
 	}
       }
 
-    //std::cout<<fBDC1_X<<" "<<fBDC1_Y<<std::endl;
-      fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
     }  
   }
 
@@ -202,8 +177,6 @@ void BDCDataProcessor::FillHistograms()
 	}
       }
 
-      fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
-
     }      
   }
 
@@ -226,7 +199,43 @@ void BDCDataProcessor::FillHistograms()
     fTarget_Y = targetPosition.Y();
     fTarget_A = TMath::ATan(beamDirection.X()/beamDirection.Z());// rad
     fTarget_B = TMath::ATan(beamDirection.Y()/beamDirection.Z());// rad
-    
+
+//    std::cout<<fTarget_X<<" "
+//	     <<fTarget_Y<<" "
+//	     <<std::endl;
+  }
+
+  
+}
+//____________________________________________________________________
+void BDCDataProcessor::FillHistograms()
+{  
+
+  // BDC1 Hit
+  TClonesArray *hit_array = fCalibBDC1Hit->GetDCHitArray();
+  int n=hit_array->GetEntries();
+  for (int i=0;i<n;++i){
+    TArtDCHit *hit = (TArtDCHit*)hit_array->At(i);
+    Double_t id = hit->GetID();
+    Double_t traw = hit->GetTDC();
+    fhidt_bdc1->Fill(id,traw);
+  }
+
+  // BDC2 Hit
+  hit_array = fCalibBDC2Hit->GetDCHitArray();
+  n=hit_array->GetEntries();
+  for (int i=0;i<n;++i){
+    TArtDCHit *hit = (TArtDCHit*)hit_array->At(i);
+    Double_t id = hit->GetID();
+    Double_t traw = hit->GetTDC();
+    fhidt_bdc2->Fill(id,traw);
+  }
+
+  if (!fDoTracking) return;
+  fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
+  fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);  
+  
+  if(abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
     fhxy_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetPosition(1));
     fhx_tgt->Fill(fTargetTrack->GetPosition(0));
     fhy_tgt->Fill(fTargetTrack->GetPosition(1));
