@@ -85,7 +85,8 @@ protected:
   TArtCalibBDC2Hit*   fCalibBDC2Hit;
   TArtCalibBDC1Track* fCalibBDC1Track;
   TArtCalibBDC2Track* fCalibBDC2Track;
-  TArtDCTrack*        fTargetTrack;
+  Double_t fBDC1_X, fBDC1_Y, fBDC1_A, fBDC1_B;
+  Double_t fBDC2_X, fBDC2_Y, fBDC2_A, fBDC2_B;
   Double_t            fTarget_X;
   Double_t            fTarget_Y;
   Double_t            fTarget_A;
@@ -107,9 +108,6 @@ protected:
   TH1* fhx_tgt;
   TH1* fhy_tgt;  
 
-  //Variables
-  Double_t fBDC1_X, fBDC1_Y, fBDC1_ThetaX, fBDC1_ThetaY;
-  Double_t fBDC2_X, fBDC2_Y, fBDC2_ThetaX, fBDC2_ThetaY;
   //constant
   Double_t fBDC1_Z;
   Double_t fBDC2_Z;

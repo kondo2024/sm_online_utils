@@ -12,8 +12,6 @@ void BDCDataProcessor::PrepareCalib()
 {
   if (fCalibReady) return;
 
-  std::cout<<"PrepareCalib"<<std::endl;
-  
   TArtSAMURAIParameters *smprm = TArtSAMURAIParameters::Instance();
   smprm->LoadParameter(fdbfilename1);
   smprm->LoadParameter(fdbfilename2);
@@ -22,14 +20,9 @@ void BDCDataProcessor::PrepareCalib()
   fCalibBDC2Hit = new TArtCalibBDC2Hit;
   fCalibBDC1Track = new TArtCalibBDC1Track;
   fCalibBDC2Track = new TArtCalibBDC2Track;
-  //  fTargetTrack = new TArtDCTrack;
 
   fCalibBDC1Track->SetTDCWindow(0,3000);
   fCalibBDC2Track->SetTDCWindow(0,3000);
-//  fCalibBDC1Track->SetTDCWindow(5500,6500);
-//  fCalibBDC2Track->SetTDCWindow(5500,6500);
-//  fCalibBDC1Track->SetTDCWindow(4000,4700);
-//  fCalibBDC2Track->SetTDCWindow(4000,4700);
   LoadDCTDCDistribution();
   
   fCalibReady = true;
@@ -39,33 +32,32 @@ void BDCDataProcessor::PrepareTreeBranches(TTree *tree)
 {
   if (!fCalibReady) PrepareCalib();
 
-  std::cout<<"PrepareTreeBranch"<<std::endl;
-
   fTree = tree;
   TClonesArray *bdc1track_array = fCalibBDC1Track->GetDCTrackArray();
   TClonesArray *bdc2track_array = fCalibBDC2Track->GetDCTrackArray();
-  //fTree->Branch(Form("%s1",fBranchName.Data()), &bdc1track_array);
-  //fTree->Branch(Form("%s2",fBranchName.Data()), &bdc2track_array);
-  //  fTree->Branch("Target", &fTargetTrack);
-  tree->Branch("TargetX", &fTarget_X, "TargetX/D");
-  tree->Branch("TargetY", &fTarget_Y, "TargetY/D");
-  tree->Branch("TargetA", &fTarget_A, "TargetA/D");
-  tree->Branch("TargetB", &fTarget_B, "TargetB/D");
+  tree->Branch("BDC1X", &fBDC1_X);
+  tree->Branch("BDC1Y", &fBDC1_Y);
+  tree->Branch("BDC2X", &fBDC2_X);
+  tree->Branch("BDC2Y", &fBDC2_Y);
+
+  tree->Branch("TargetX", &fTarget_X);
+  tree->Branch("TargetY", &fTarget_Y);
+  tree->Branch("TargetA", &fTarget_A);
+  tree->Branch("TargetB", &fTarget_B);
+
 }
 //____________________________________________________________________
 void BDCDataProcessor::PrepareHistograms()
 {
   if (!fCalibReady) PrepareCalib();
 
-  std::cout<<"PrepareHistograms"<<std::endl;
-  
   fhidt_bdc1 = new TH2D("bdc1_idtu","BDC1 ID Traw",128,0.5,128.5,100,0,5000);
   fhidt_bdc2 = new TH2D("bdc2_idtu","BDC2 ID Traw",128,0.5,128.5,100,0,5000);
   fhxy_bdc1 = new TH2D("bdc1_xy","BDC1 XY",100,-50,50, 100,-50,50);
   fhxy_bdc2 = new TH2D("bdc2_xy","BDC2 XY",100,-50,50, 100,-50,50);
   fhxy_tgt = new TH2D("tgt_xy","Target XY",100,-50,50, 100,-50,50);
-  fhxa_tgt = new TH2D("tgt_xa","Target XA",100,-50,50, 100,-50,50);
-  fhyb_tgt = new TH2D("tgt_yb","Target YB",100,-50,50, 100,-50,50);
+  fhxa_tgt = new TH2D("tgt_xa","Target XA",100,-50,50, 100,-0.050,0.050);
+  fhyb_tgt = new TH2D("tgt_yb","Target YB",100,-50,50, 100,-0.050,0.050);
   fhx_tgt = new TH1D("tgt_x","Target X",100,-50,50);
   fhy_tgt = new TH1D("tgt_y","Target Y",100,-50,50);
 
@@ -82,28 +74,20 @@ void BDCDataProcessor::PrepareHistograms()
 //____________________________________________________________________
 void BDCDataProcessor::ClearData()
 {
-  //std::cout<<"ClearData"<<std::endl;
   
   fCalibBDC1Hit->ClearData();
   fCalibBDC2Hit->ClearData();
   fCalibBDC1Track->ClearData();
   fCalibBDC2Track->ClearData();
 
-//  fTargetTrack->Clear();
-//  fTargetTrack->SetPosition(0,-9999);
-//  fTargetTrack->SetPosition(1,-9999);
-//  fTargetTrack->SetAngle(0,-9999);
-//  fTargetTrack->SetAngle(1,-9999);
-
-  fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_ThetaX = -9999; fBDC1_ThetaY = -9999;
-  fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_ThetaX = -9999; fBDC2_ThetaY = -9999;
+  fBDC1_X = -9999; fBDC1_Y = -9999; fBDC1_A = -9999; fBDC1_B = -9999;
+  fBDC2_X = -9999; fBDC2_Y = -9999; fBDC2_A = -9999; fBDC2_B = -9999;
   fTarget_X = -9999.; fTarget_Y = -9999.;
   fTarget_A = -9999.; fTarget_B = -9999.;
 }
 //____________________________________________________________________
 void BDCDataProcessor::ReconstructData()
 {
-  //std::cout<<"ReconstructData"<<std::endl;
 
   fCalibBDC1Hit->ReconstructData();
   fCalibBDC2Hit->ReconstructData();
@@ -136,13 +120,13 @@ void BDCDataProcessor::ReconstructData()
 	  
 	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
 	      fBDC1_X = TempXPosition;
-  	      fBDC1_ThetaX = TMath::ATan(TrackBDC1->GetAngle(0));
+  	      fBDC1_A = TMath::ATan(TrackBDC1->GetAngle(0));
 	      MinChi2x = TempChi2;
 	    }	      
 
 	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
 	      fBDC1_Y = TempYPosition;
-  	      fBDC1_ThetaY = TMath::ATan(TrackBDC1->GetAngle(1));
+  	      fBDC1_B = TMath::ATan(TrackBDC1->GetAngle(1));
 	      MinChi2y = TempChi2;
 	    }	      
 	  }
@@ -174,13 +158,13 @@ void BDCDataProcessor::ReconstructData()
 	  
 	    if(TMath::Abs(TempXPosition) < 5000 && TempChi2 < MinChi2x) {
 	      fBDC2_X = TempXPosition;
-  	      fBDC2_ThetaX = TMath::ATan(TrackBDC2->GetAngle(0));
+  	      fBDC2_A = TMath::ATan(TrackBDC2->GetAngle(0));
 	      MinChi2x = TempChi2;
 	    }	      
 
 	    if(TMath::Abs(TempYPosition) < 5000 && TempChi2 < MinChi2y) {
 	      fBDC2_Y = TempYPosition;
-  	      fBDC2_ThetaY = TMath::ATan(TrackBDC2->GetAngle(1));
+  	      fBDC2_B = TMath::ATan(TrackBDC2->GetAngle(1));
 	      MinChi2y = TempChi2;
 	    }	      
 	  }
@@ -199,20 +183,11 @@ void BDCDataProcessor::ReconstructData()
 
     TVector3 targetPosition 
       = bdc1Position +  (fTarget_Z-bdc1Position.Z())/beamDirection.Z()*beamDirection;
-	  
-    fTargetTrack->SetPosition(targetPosition.X(),0);
-    fTargetTrack->SetPosition(targetPosition.Y(),1);
-    fTargetTrack->SetAngle(TMath::ATan(beamDirection.X()/beamDirection.Z())*1000.,0);// mrad
-    fTargetTrack->SetAngle(TMath::ATan(beamDirection.Y()/beamDirection.Z())*1000.,1);
 
     fTarget_X = targetPosition.X();
     fTarget_Y = targetPosition.Y();
     fTarget_A = TMath::ATan(beamDirection.X()/beamDirection.Z());// rad
     fTarget_B = TMath::ATan(beamDirection.Y()/beamDirection.Z());// rad
-
-//    std::cout<<fTarget_X<<" "
-//	     <<fTarget_Y<<" "
-//	     <<std::endl;
   }
 
   
@@ -220,8 +195,6 @@ void BDCDataProcessor::ReconstructData()
 //____________________________________________________________________
 void BDCDataProcessor::FillHistograms()
 {  
-  //std::cout<<"FillHistograms"<<std::endl;
-  
   // BDC1 Hit
   TClonesArray *hit_array = fCalibBDC1Hit->GetDCHitArray();
   int n=hit_array->GetEntries();
@@ -242,25 +215,22 @@ void BDCDataProcessor::FillHistograms()
     fhidt_bdc2->Fill(id,traw);
   }
 
-  //if (!fDoTracking) return;
   fhxy_bdc1->Fill(fBDC1_X,fBDC1_Y); 
   fhxy_bdc2->Fill(fBDC2_X,fBDC2_Y);
-
   
   if(abs(fBDC1_X)<40&&abs(fBDC1_Y)<40&&abs(fBDC2_X)<40&&abs(fBDC2_Y)<40){
-    fhxy_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetPosition(1));
-    fhx_tgt->Fill(fTargetTrack->GetPosition(0));
-    fhy_tgt->Fill(fTargetTrack->GetPosition(1));
+    fhxy_tgt->Fill(fTarget_X,fTarget_Y);
+    fhx_tgt->Fill(fTarget_X);
+    fhy_tgt->Fill(fTarget_Y);
 
-    fhxa_tgt->Fill(fTargetTrack->GetPosition(0),fTargetTrack->GetAngle(0));
-    fhyb_tgt->Fill(fTargetTrack->GetPosition(1),fTargetTrack->GetAngle(1));
+    fhxa_tgt->Fill(fTarget_X,fTarget_A);
+    fhyb_tgt->Fill(fTarget_Y,fTarget_B);
   }
 
 }
 //____________________________________________________________________
 
 void BDCDataProcessor::LoadDCTDCDistribution() {
-  std::cout<<"LoadDCTDCDist"<<std::endl;
   
   TDirectory *pwd = gDirectory;
 
