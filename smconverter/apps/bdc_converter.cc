@@ -27,6 +27,9 @@ int main(int argc, char **argv){
   BDCDataProcessor bdc(fname_tdc.Data());
   bdc.MakeTreeBranches(true);
   bdc.MakeHistograms(true);
+  bdc.SetBDC1Z(-2407.);
+  bdc.SetBDC2Z(-1407.);
+  bdc.SetTargetZ(0.);
   converter.RegisterDataProcessor(&bdc);
 
   converter.Run();
