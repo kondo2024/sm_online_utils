@@ -1,7 +1,7 @@
 void chkpla(Int_t nRun=1070){
 
   TArtBigRIPSParameters *prm = TArtBigRIPSParameters::Instance();
-  prm->LoadParameter("db/BigRIPSPlastic.xml");
+  prm->LoadParameter("db/SAMURAIPlastic.xml");
 
   TArtEventStore *estore = new TArtEventStore();
   if (nRun==0) estore->Open(0);
